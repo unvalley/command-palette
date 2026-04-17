@@ -143,22 +143,53 @@ export function createCommand(options: CommandOptions = {}): CommandStore {
     options.onSearchChange?.(search)
     notify()
   }
-  function setValue(_: string): void {
-    throw new Error('not implemented')
+
+  function setValue(next: string): void {
+    if (next === value) return
+    value = next
+    options.onValueChange?.(value)
+    notify()
   }
-  function setComposing(_: boolean): void {
-    throw new Error('not implemented')
+
+  function currentIndex(): number {
+    return filteredOrder.indexOf(value)
   }
-  function selectNext(): void {
-    throw new Error('not implemented')
-  }
-  function selectPrev(): void {
-    throw new Error('not implemented')
-  }
+
   function selectFirst(): void {
-    throw new Error('not implemented')
+    if (filteredOrder.length === 0) return
+    setValue(filteredOrder[0]!)
   }
+
   function selectLast(): void {
+    if (filteredOrder.length === 0) return
+    setValue(filteredOrder[filteredOrder.length - 1]!)
+  }
+
+  function selectNext(): void {
+    if (filteredOrder.length === 0) return
+    const idx = currentIndex()
+    if (idx === -1) return selectFirst()
+    const nextIdx = idx + 1
+    if (nextIdx >= filteredOrder.length) {
+      if (options.loop) setValue(filteredOrder[0]!)
+      return
+    }
+    setValue(filteredOrder[nextIdx]!)
+  }
+
+  function selectPrev(): void {
+    if (filteredOrder.length === 0) return
+    const idx = currentIndex()
+    if (idx === -1) return selectLast()
+    const prevIdx = idx - 1
+    if (prevIdx < 0) {
+      if (options.loop) setValue(filteredOrder[filteredOrder.length - 1]!)
+      return
+    }
+    setValue(filteredOrder[prevIdx]!)
+  }
+
+  function setComposing(_: boolean): void {
     throw new Error('not implemented')
   }
   function triggerSelect(_?: Event): void {
