@@ -1,4 +1,4 @@
-# @unvalley/cmdk-core
+# Core
 
 Framework-agnostic command menu store.
 
@@ -7,7 +7,7 @@ This package is the internal foundation for framework adapters such as `@command
 ## Usage
 
 ```ts
-import { createCommand } from '@unvalley/cmdk-core'
+import { createCommand } from './src'
 
 const command = createCommand({
   filter: 'contains',

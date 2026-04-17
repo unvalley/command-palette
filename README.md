@@ -6,7 +6,7 @@ Command menu primitives with framework-specific adapters.
 
 - [`@command-palette/react`](./packages/react/README.md)
   Unstyled React components for building command menus.
-- [`@unvalley/cmdk-core`](./packages/core/README.md)
+- [`packages/core`](./packages/core/README.md)
   Internal store and filtering engine used by adapters.
 
 ## Install

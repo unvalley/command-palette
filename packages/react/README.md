@@ -2,7 +2,7 @@
 
 Unstyled React primitives for building command menus.
 
-Built on top of `@unvalley/cmdk-core`.
+Built on top of the internal command store.
 
 ## Install
 
