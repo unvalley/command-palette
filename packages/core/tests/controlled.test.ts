@@ -40,3 +40,20 @@ describe('createCommand: controlled mode', () => {
     expect(cmd.getState().search).toBe('foo')
   })
 })
+
+describe('createCommand: subscribeSlice', () => {
+  it('calls listener when selected slice changes', () => {
+    const cmd = createCommand()
+    cmd.registerItem({ value: 'a' })
+    cmd.registerItem({ value: 'b' })
+    const listener = vi.fn()
+    const unsub = cmd.subscribeSlice((s) => s.value, listener)
+    cmd.setValue('a')
+    expect(listener).toHaveBeenCalledWith('a')
+    cmd.setValue('a') // unchanged — should not re-fire
+    expect(listener).toHaveBeenCalledTimes(1)
+    unsub()
+    cmd.setValue('b')
+    expect(listener).toHaveBeenCalledTimes(1)
+  })
+})

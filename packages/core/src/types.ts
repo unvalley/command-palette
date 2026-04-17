@@ -62,10 +62,12 @@ export interface CommandState {
   value: string
   items: ReadonlyMap<string, ItemData>
   groups: ReadonlyMap<string, GroupData>
-  /** Visible items in display order (score desc, then insertion order). */
+  /** Visible items in display order. Includes disabled items (they render but are not navigable). */
   filteredOrder: readonly string[]
-  /** Same set as filteredOrder — for O(1) `has()` lookups by item subscribers. */
+  /** Same set as filteredOrder — for O(1) `has()` lookups. Includes disabled items. */
   visibleSet: ReadonlySet<string>
+  /** Items available for keyboard navigation (excludes disabled). */
+  navigableOrder: readonly string[]
   /** Group ids that contain at least one visible item OR have forceMount. */
   visibleGroups: ReadonlySet<string>
   /** True while an IME composition is in progress (input adapter sets this). */
@@ -95,4 +97,14 @@ export interface CommandStore {
   // State access
   getState(): CommandState
   subscribe(listener: () => void): () => void
+  /**
+   * Subscribe to a slice of state. The listener is called with the initial slice
+   * value and again whenever the computed slice changes (per `isEqual`, which
+   * defaults to Object.is). Returns an unsubscribe function.
+   */
+  subscribeSlice<T>(
+    selector: (state: CommandState) => T,
+    listener: (slice: T) => void,
+    isEqual?: (a: T, b: T) => boolean,
+  ): () => void
 }

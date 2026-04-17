@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { createCommand } from '../src/store'
 
 describe('createCommand: search + filter', () => {
@@ -53,11 +53,25 @@ describe('createCommand: search + filter', () => {
     expect(order).toContain('banana')
   })
 
-  it('disabled item is not visible', () => {
+  it('disabled item is in filteredOrder but not navigableOrder', () => {
     const cmd = createCommand()
     cmd.registerItem({ value: 'apple', disabled: true })
     cmd.registerItem({ value: 'banana' })
-    expect(cmd.getState().filteredOrder).toEqual(['banana'])
+    expect(cmd.getState().filteredOrder).toEqual(['apple', 'banana'])
+    expect(cmd.getState().navigableOrder).toEqual(['banana'])
+  })
+
+  it('custom filter that throws is handled gracefully', () => {
+    const cmd = createCommand({
+      filter: () => {
+        throw new Error('boom')
+      },
+    })
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    cmd.registerItem({ value: 'a' })
+    expect(() => cmd.setSearch('x')).not.toThrow()
+    expect(cmd.getState().filteredOrder).toEqual([])
+    warn.mockRestore()
   })
 
   it('matches diacritics via default filter (regression #386)', () => {

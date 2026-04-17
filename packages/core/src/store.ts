@@ -25,6 +25,7 @@ export function createCommand(options: CommandOptions = {}): CommandStore {
   let isComposing = false
   let filteredOrder: string[] = []
   let visibleSet: Set<string> = new Set()
+  let navigableOrder: string[] = []
   let visibleGroups: Set<string> = new Set()
   let initialized = false
 
@@ -38,9 +39,16 @@ export function createCommand(options: CommandOptions = {}): CommandStore {
     // Score every item
     for (const item of items.values()) {
       if (!shouldFilter || search === '') {
-        item.score = item.disabled ? 0 : 1
+        item.score = 1
       } else {
-        item.score = filter(item.value, search, item.keywords ?? [])
+        try {
+          item.score = filter(item.value, search, item.keywords ?? [])
+        } catch (err) {
+          if (isDev) {
+            console.warn(`cmdk: filter threw for value "${item.value}":`, err)
+          }
+          item.score = 0
+        }
       }
     }
 
@@ -55,6 +63,7 @@ export function createCommand(options: CommandOptions = {}): CommandStore {
     })
     filteredOrder = visible.map((i) => i.value)
     visibleSet = new Set(filteredOrder)
+    navigableOrder = visible.filter((i) => !i.disabled).map((i) => i.value)
 
     // visibleGroups: any group containing a visible item, plus forceMount groups
     visibleGroups = new Set()
@@ -65,11 +74,11 @@ export function createCommand(options: CommandOptions = {}): CommandStore {
       if (item.groupId) visibleGroups.add(item.groupId)
     }
 
-    // Auto-correct selection if the previously-selected value is no longer visible.
+    // Auto-correct selection if the previously-selected value is no longer navigable.
     // Skip during initial recompute (respect options.value).
     // Skip if user has never made a selection (initial mount has no highlight).
-    if (initialized && hasBeenSelected && !visibleSet.has(value)) {
-      const next = filteredOrder[0] ?? ''
+    if (initialized && hasBeenSelected && !navigableOrder.includes(value)) {
+      const next = navigableOrder[0] ?? ''
       if (next !== value) {
         value = next
         // Notify synchronously — the caller (e.g. setSearch, registerItem) will call
@@ -87,6 +96,7 @@ export function createCommand(options: CommandOptions = {}): CommandStore {
       groups,
       filteredOrder,
       visibleSet,
+      navigableOrder,
       visibleGroups,
       isComposing,
       pointerSelection,
@@ -152,6 +162,21 @@ export function createCommand(options: CommandOptions = {}): CommandStore {
     }
   }
 
+  function subscribeSlice<T>(
+    selector: (state: CommandState) => T,
+    listener: (slice: T) => void,
+    isEqual: (a: T, b: T) => boolean = Object.is,
+  ): () => void {
+    let prev = selector(getState())
+    return subscribe(() => {
+      const next = selector(getState())
+      if (!isEqual(prev, next)) {
+        prev = next
+        listener(next)
+      }
+    })
+  }
+
   // Stub mutations — implemented in later tasks
   function setSearch(next: string): void {
     if (next === search) return
@@ -170,40 +195,42 @@ export function createCommand(options: CommandOptions = {}): CommandStore {
   }
 
   function currentIndex(): number {
-    return filteredOrder.indexOf(value)
+    return navigableOrder.indexOf(value)
   }
 
   function selectFirst(): void {
-    const first = filteredOrder[0]
+    const first = navigableOrder[0]
     if (first === undefined) return
     setValue(first)
   }
 
   function selectLast(): void {
-    const last = filteredOrder[filteredOrder.length - 1]
+    const last = navigableOrder[navigableOrder.length - 1]
     if (last === undefined) return
     setValue(last)
   }
 
   function selectNext(): void {
-    if (filteredOrder.length === 0) return
+    if (navigableOrder.length === 0) return
     const idx = currentIndex()
     if (idx === -1) {
       selectFirst()
       return
     }
     const nextIdx = idx + 1
-    if (nextIdx >= filteredOrder.length) {
-      const first = filteredOrder[0]
-      if (options.loop && first !== undefined) setValue(first)
+    if (nextIdx >= navigableOrder.length) {
+      if (options.loop) {
+        const first = navigableOrder[0]
+        if (first !== undefined) setValue(first)
+      }
       return
     }
-    const next = filteredOrder[nextIdx]
+    const next = navigableOrder[nextIdx]
     if (next !== undefined) setValue(next)
   }
 
   function selectPrev(): void {
-    if (filteredOrder.length === 0) return
+    if (navigableOrder.length === 0) return
     const idx = currentIndex()
     if (idx === -1) {
       selectLast()
@@ -211,11 +238,13 @@ export function createCommand(options: CommandOptions = {}): CommandStore {
     }
     const prevIdx = idx - 1
     if (prevIdx < 0) {
-      const last = filteredOrder[filteredOrder.length - 1]
-      if (options.loop && last !== undefined) setValue(last)
+      if (options.loop) {
+        const last = navigableOrder[navigableOrder.length - 1]
+        if (last !== undefined) setValue(last)
+      }
       return
     }
-    const prev = filteredOrder[prevIdx]
+    const prev = navigableOrder[prevIdx]
     if (prev !== undefined) setValue(prev)
   }
 
@@ -248,5 +277,6 @@ export function createCommand(options: CommandOptions = {}): CommandStore {
     triggerSelect,
     getState,
     subscribe,
+    subscribeSlice,
   }
 }
