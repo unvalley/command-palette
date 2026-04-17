@@ -25,6 +25,7 @@ export function createCommand(options: CommandOptions = {}): CommandStore {
   let filteredOrder: string[] = []
   let visibleSet: Set<string> = new Set()
   let visibleGroups: Set<string> = new Set()
+  let initialized = false
 
   const listeners = new Set<() => void>()
 
@@ -61,6 +62,18 @@ export function createCommand(options: CommandOptions = {}): CommandStore {
     }
     for (const item of visible) {
       if (item.groupId) visibleGroups.add(item.groupId)
+    }
+
+    // Auto-correct selection if current value is no longer visible.
+    // Skip during initialization (before items are registered) to respect options.value.
+    if (initialized && !visibleSet.has(value)) {
+      const next = filteredOrder[0] ?? ''
+      if (next !== value) {
+        value = next
+        // Notify synchronously — the caller (e.g. setSearch, registerItem) will call
+        // notify() afterwards, so subscribers observe the corrected state.
+        options.onValueChange?.(value)
+      }
     }
   }
 
@@ -192,11 +205,15 @@ export function createCommand(options: CommandOptions = {}): CommandStore {
   function setComposing(_: boolean): void {
     throw new Error('not implemented')
   }
-  function triggerSelect(_?: Event): void {
-    throw new Error('not implemented')
+  function triggerSelect(event?: Event): void {
+    if (value === '') return
+    const item = items.get(value)
+    if (!item || item.disabled) return
+    item.onSelect?.(value, event)
   }
 
   recompute()
+  initialized = true
 
   return {
     registerItem,
