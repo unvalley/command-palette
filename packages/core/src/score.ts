@@ -1,4 +1,5 @@
 import { normalize } from './normalize'
+import type { FilterMode } from './types'
 
 const SCORE_CONTINUE_MATCH = 1
 const SCORE_SPACE_WORD_JUMP = 0.9
@@ -158,3 +159,31 @@ export const commandScorePrepared = (
     0,
     {},
   )
+
+const wordBoundaryIndex = (haystack: string, needle: string): number =>
+  haystack.indexOf(` ${needle}`)
+
+export const commandContainsScorePrepared = (
+  prepared: PreparedCommandScoreHaystack,
+  normalizedAbbreviation: string,
+): number => {
+  if (normalizedAbbreviation === '') return 1
+  if (prepared.normalizedHaystack.startsWith(normalizedAbbreviation)) return 1
+  if (wordBoundaryIndex(prepared.normalizedHaystack, normalizedAbbreviation) >= 0) return 0.95
+  if (prepared.normalizedHaystack.includes(normalizedAbbreviation)) return 0.9
+  return 0
+}
+
+export const commandBuiltInScorePrepared = (
+  prepared: PreparedCommandScoreHaystack,
+  abbreviation: string,
+  normalizedAbbreviation: string,
+  mode: Exclude<FilterMode, 'none'>,
+): number => {
+  switch (mode) {
+    case 'fuzzy':
+      return commandScorePrepared(prepared, abbreviation, normalizedAbbreviation)
+    case 'contains':
+      return commandContainsScorePrepared(prepared, normalizedAbbreviation)
+  }
+}

@@ -6,6 +6,7 @@ export type {
   CommandState,
   CommandStore,
   FilterFn,
+  FilterMode,
   GroupData,
   GroupInput,
   ItemData,

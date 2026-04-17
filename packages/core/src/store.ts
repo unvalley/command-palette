@@ -1,5 +1,5 @@
 import { normalize } from './normalize'
-import { commandScore, commandScorePrepared, prepareCommandScoreHaystack } from './score'
+import { commandBuiltInScorePrepared, prepareCommandScoreHaystack } from './score'
 import type {
   CommandOptions,
   CommandState,
@@ -13,8 +13,8 @@ import type {
 const isDev = process.env.NODE_ENV !== 'production'
 
 export const createCommand = (options: CommandOptions = {}): CommandStore => {
-  const filter = options.filter ?? commandScore
-  const shouldFilter = options.shouldFilter ?? true
+  const filterMode = options.filterMode ?? 'fuzzy'
+  const filter = filterMode === 'none' ? null : options.filter
   const pointerSelection = options.pointerSelection ?? 'hover'
 
   let nextOrder = 0
@@ -46,7 +46,7 @@ export const createCommand = (options: CommandOptions = {}): CommandStore => {
     const nextNavigableIndex: Map<string, number> = new Map()
     const nextVisibleGroups: Set<string> = new Set()
 
-    if (!shouldFilter || search === '') {
+    if (filterMode === 'none' || search === '') {
       for (const item of items.values()) {
         item.score = 1
         nextFilteredOrder.push(item.value)
@@ -58,14 +58,19 @@ export const createCommand = (options: CommandOptions = {}): CommandStore => {
         }
       }
     } else {
-      const normalizedSearch = filter === commandScore ? normalize(search) : ''
+      const normalizedSearch = filter == null ? normalize(search) : ''
       const visible: ItemData[] = []
 
       for (const item of items.values()) {
         try {
           item.score =
-            filter === commandScore
-              ? commandScorePrepared(getPreparedScoreHaystack(item), search, normalizedSearch)
+            filter == null
+              ? commandBuiltInScorePrepared(
+                  getPreparedScoreHaystack(item),
+                  search,
+                  normalizedSearch,
+                  filterMode,
+                )
               : filter(item.value, search, item.keywords ?? [])
         } catch (err) {
           if (isDev) {

@@ -25,8 +25,8 @@ describe('createCommand: search + filter', () => {
     expect(cmd.getState().filteredOrder[0]).toBe('apple banana')
   })
 
-  it('respects shouldFilter: false', () => {
-    const cmd = createCommand({ shouldFilter: false })
+  it('respects filterMode: none', () => {
+    const cmd = createCommand({ filterMode: 'none' })
     cmd.registerItem({ value: 'apple' })
     cmd.registerItem({ value: 'xyz' })
     cmd.setSearch('app')
@@ -41,6 +41,15 @@ describe('createCommand: search + filter', () => {
     cmd.registerItem({ value: 'banana' })
     cmd.setSearch('app')
     expect(cmd.getState().filteredOrder).toEqual(['apple'])
+  })
+
+  it('supports built-in contains mode', () => {
+    const cmd = createCommand({ filterMode: 'contains' })
+    cmd.registerItem({ value: 'apple' })
+    cmd.registerItem({ value: 'pineapple' })
+    cmd.registerItem({ value: 'banana' })
+    cmd.setSearch('app')
+    expect(cmd.getState().filteredOrder).toEqual(['apple', 'pineapple'])
   })
 
   it('forceMount keeps item visible even with non-matching search', () => {

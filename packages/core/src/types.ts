@@ -1,6 +1,9 @@
 /** Default scorer signature. Return 0 to hide an item; > 0 to show (higher = better). */
 export type FilterFn = (value: string, search: string, keywords: readonly string[]) => number
 
+/** Built-in filter behaviors. */
+export type FilterMode = 'fuzzy' | 'contains' | 'none'
+
 /** Behavior when arrow keys reach the boundary. */
 export type PointerSelectionMode = 'hover' | 'click'
 
@@ -38,9 +41,9 @@ export type GroupData = GroupInput & {
 }
 
 export type CommandOptions = {
-  /** Run the filter? Default true. Set false when caller filters externally. */
-  shouldFilter?: boolean
-  /** Custom scorer. Default = built-in command-score. */
+  /** Built-in filter behavior. Default 'fuzzy'. Set 'none' when caller filters externally. */
+  filterMode?: FilterMode
+  /** Custom scorer. Overrides built-in filtering unless filterMode is 'none'. */
   filter?: FilterFn
   /** Wrap arrow-key navigation past the ends. Default false. */
   loop?: boolean
