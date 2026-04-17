@@ -1,15 +1,7 @@
-import {
-  type HTMLAttributes,
-  type ReactNode,
-  forwardRef,
-  useEffect,
-  useId,
-  useRef,
-} from 'react'
+import { type HTMLAttributes, type ReactNode, forwardRef, useEffect, useId, useRef } from 'react'
 import { useCommandSlice, useCommandStore } from './context'
 
-export interface ItemProps
-  extends Omit<HTMLAttributes<HTMLDivElement>, 'onSelect'> {
+export interface ItemProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onSelect'> {
   value: string
   keywords?: readonly string[]
   disabled?: boolean
@@ -31,6 +23,7 @@ export const Item = forwardRef<HTMLDivElement, ItemProps>(function Item(
   onSelectRef.current = onSelect
 
   // Register on mount, unregister on unmount.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally omit keywords/disabled/forceMount/groupId — they are patched via updateItem
   useEffect(() => {
     const unregister = store.registerItem({
       value,
@@ -41,8 +34,6 @@ export const Item = forwardRef<HTMLDivElement, ItemProps>(function Item(
       onSelect: (v, e) => onSelectRef.current?.(v, e),
     })
     return unregister
-    // We re-register if value changes (identity moved).
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [store, value])
 
   // Patch other props that don't change identity.
@@ -74,6 +65,7 @@ export const Item = forwardRef<HTMLDivElement, ItemProps>(function Item(
   }
 
   return (
+    // biome-ignore lint/a11y/useFocusableInteractive: cmdk items are keyboard-navigated via input, not directly focusable
     <div
       ref={ref}
       cmdk-item=""

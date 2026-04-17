@@ -56,18 +56,18 @@ function commandScoreInner(
         score *= SCORE_NON_SPACE_WORD_JUMP
         wordBreaks = string.slice(stringIndex, index - 1).match(COUNT_GAPS_REGEXP)
         if (wordBreaks && stringIndex > 0) {
-          score *= Math.pow(PENALTY_SKIPPED, wordBreaks.length)
+          score *= PENALTY_SKIPPED ** wordBreaks.length
         }
       } else if (IS_SPACE_REGEXP.test(string.charAt(index - 1))) {
         score *= SCORE_SPACE_WORD_JUMP
         spaceBreaks = string.slice(stringIndex, index - 1).match(/[\s\-]/g)
         if (spaceBreaks && stringIndex > 0) {
-          score *= Math.pow(PENALTY_SKIPPED, spaceBreaks.length)
+          score *= PENALTY_SKIPPED ** spaceBreaks.length
         }
       } else {
         score *= SCORE_CHARACTER_JUMP
         if (stringIndex > 0) {
-          score *= Math.pow(PENALTY_SKIPPED, index - stringIndex)
+          score *= PENALTY_SKIPPED ** (index - stringIndex)
         }
       }
 
@@ -79,7 +79,8 @@ function commandScoreInner(
     if (
       (score < SCORE_TRANSPOSITION &&
         lowerString.charAt(index - 1) === lowerAbbreviation.charAt(abbreviationIndex + 1)) ||
-      (lowerAbbreviation.charAt(abbreviationIndex + 1) === lowerAbbreviation.charAt(abbreviationIndex) &&
+      (lowerAbbreviation.charAt(abbreviationIndex + 1) ===
+        lowerAbbreviation.charAt(abbreviationIndex) &&
         lowerString.charAt(index - 1) !== lowerAbbreviation.charAt(abbreviationIndex))
     ) {
       transposedScore = commandScoreInner(
@@ -120,8 +121,7 @@ export function commandScore(
   abbreviation: string,
   aliases: readonly string[],
 ): number {
-  const haystack =
-    aliases && aliases.length > 0 ? `${string} ${aliases.join(' ')}` : string
+  const haystack = aliases && aliases.length > 0 ? `${string} ${aliases.join(' ')}` : string
   return commandScoreInner(
     haystack,
     abbreviation,

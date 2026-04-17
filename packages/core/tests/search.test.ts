@@ -95,9 +95,7 @@ describe('createCommand: search + filter', () => {
 
   it('special characters in value do not crash (regression #387)', () => {
     const cmd = createCommand()
-    expect(() =>
-      cmd.registerItem({ value: '<script>alert(1)</script>' }),
-    ).not.toThrow()
+    expect(() => cmd.registerItem({ value: '<script>alert(1)</script>' })).not.toThrow()
     expect(() => cmd.setSearch('script')).not.toThrow()
     expect(cmd.getState().filteredOrder).toContain('<script>alert(1)</script>')
   })

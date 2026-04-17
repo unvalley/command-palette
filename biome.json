@@ -20,5 +20,18 @@
   },
   "files": {
     "ignore": ["node_modules", "dist", "**/*.d.ts"]
-  }
+  },
+  "overrides": [
+    {
+      "include": ["packages/react/src/*.tsx"],
+      "linter": {
+        "rules": {
+          "a11y": {
+            "useSemanticElements": "off",
+            "useAriaPropsForRole": "off"
+          }
+        }
+      }
+    }
+  ]
 }

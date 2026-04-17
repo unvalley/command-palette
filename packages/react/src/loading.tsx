@@ -11,6 +11,7 @@ export const Loading = forwardRef<HTMLDivElement, LoadingProps>(function Loading
   ref,
 ) {
   return (
+    // biome-ignore lint/a11y/useFocusableInteractive: progressbar is a visual indicator, not interactive
     <div
       ref={ref}
       cmdk-loading=""

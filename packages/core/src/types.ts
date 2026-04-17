@@ -1,9 +1,5 @@
 /** Default scorer signature. Return 0 to hide an item; > 0 to show (higher = better). */
-export type FilterFn = (
-  value: string,
-  search: string,
-  keywords: readonly string[],
-) => number
+export type FilterFn = (value: string, search: string, keywords: readonly string[]) => number
 
 /** Behavior when arrow keys reach the boundary. */
 export type PointerSelectionMode = 'hover' | 'click'

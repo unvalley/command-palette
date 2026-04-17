@@ -56,6 +56,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
       cmdk-input=""
       role="combobox"
       aria-autocomplete="list"
+      aria-expanded="true"
       autoComplete="off"
       autoCorrect="off"
       spellCheck={false}

@@ -9,6 +9,8 @@ export const List = forwardRef<HTMLDivElement, ListProps>(function List(
   ref,
 ) {
   return (
+    // biome-ignore lint/a11y/useFocusableInteractive: cmdk list is navigated via keyboard from the input, not directly
+    // biome-ignore lint/a11y/useSemanticElements: cmdk uses role="listbox" on div for styling flexibility
     <div ref={ref} cmdk-list="" role="listbox" {...rest}>
       {children}
     </div>

@@ -1,8 +1,8 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { Command } from '../src/command'
-import { Item } from '../src/item'
 import { Input } from '../src/input'
+import { Item } from '../src/item'
 import { List } from '../src/list'
 
 function setup(props?: Parameters<typeof Command>[0]) {

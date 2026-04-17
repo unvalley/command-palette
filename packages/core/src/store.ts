@@ -21,7 +21,7 @@ export function createCommand(options: CommandOptions = {}): CommandStore {
   const groups = new Map<string, GroupData>()
   let search = options.search ?? ''
   let value = options.value ?? ''
-  let hasBeenSelected = value !== ''  // true if controlled with non-empty initial
+  let hasBeenSelected = value !== '' // true if controlled with non-empty initial
   let isComposing = false
   let filteredOrder: string[] = []
   let visibleSet: Set<string> = new Set()
@@ -147,7 +147,9 @@ export function createCommand(options: CommandOptions = {}): CommandStore {
 
   function subscribe(listener: () => void): () => void {
     listeners.add(listener)
-    return () => { listeners.delete(listener) }
+    return () => {
+      listeners.delete(listener)
+    }
   }
 
   // Stub mutations — implemented in later tasks
@@ -172,37 +174,49 @@ export function createCommand(options: CommandOptions = {}): CommandStore {
   }
 
   function selectFirst(): void {
-    if (filteredOrder.length === 0) return
-    setValue(filteredOrder[0]!)
+    const first = filteredOrder[0]
+    if (first === undefined) return
+    setValue(first)
   }
 
   function selectLast(): void {
-    if (filteredOrder.length === 0) return
-    setValue(filteredOrder[filteredOrder.length - 1]!)
+    const last = filteredOrder[filteredOrder.length - 1]
+    if (last === undefined) return
+    setValue(last)
   }
 
   function selectNext(): void {
     if (filteredOrder.length === 0) return
     const idx = currentIndex()
-    if (idx === -1) return selectFirst()
-    const nextIdx = idx + 1
-    if (nextIdx >= filteredOrder.length) {
-      if (options.loop) setValue(filteredOrder[0]!)
+    if (idx === -1) {
+      selectFirst()
       return
     }
-    setValue(filteredOrder[nextIdx]!)
+    const nextIdx = idx + 1
+    if (nextIdx >= filteredOrder.length) {
+      const first = filteredOrder[0]
+      if (options.loop && first !== undefined) setValue(first)
+      return
+    }
+    const next = filteredOrder[nextIdx]
+    if (next !== undefined) setValue(next)
   }
 
   function selectPrev(): void {
     if (filteredOrder.length === 0) return
     const idx = currentIndex()
-    if (idx === -1) return selectLast()
-    const prevIdx = idx - 1
-    if (prevIdx < 0) {
-      if (options.loop) setValue(filteredOrder[filteredOrder.length - 1]!)
+    if (idx === -1) {
+      selectLast()
       return
     }
-    setValue(filteredOrder[prevIdx]!)
+    const prevIdx = idx - 1
+    if (prevIdx < 0) {
+      const last = filteredOrder[filteredOrder.length - 1]
+      if (options.loop && last !== undefined) setValue(last)
+      return
+    }
+    const prev = filteredOrder[prevIdx]
+    if (prev !== undefined) setValue(prev)
   }
 
   function setComposing(next: boolean): void {

@@ -11,5 +11,6 @@ export const Separator = forwardRef<HTMLDivElement, SeparatorProps>(function Sep
 ) {
   const search = useCommandSlice((s) => s.getState().search)
   if (!alwaysRender && search !== '') return null
+  // biome-ignore lint/a11y/useFocusableInteractive: separator is a visual divider, not an interactive element
   return <div ref={ref} cmdk-separator="" role="separator" {...rest} />
 })

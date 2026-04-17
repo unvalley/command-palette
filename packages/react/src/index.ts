@@ -1,4 +1,4 @@
-import { Command as CommandRoot, type CommandProps } from './command'
+import { type CommandProps, Command as CommandRoot } from './command'
 import { Empty, type EmptyProps } from './empty'
 import { Group, type GroupProps } from './group'
 import { Input, type InputProps } from './input'

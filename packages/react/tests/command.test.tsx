@@ -2,8 +2,8 @@ import { fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { Command } from '../src/command'
-import { Input } from '../src/input'
 import { Command as CompoundCommand } from '../src/index'
+import { Input } from '../src/input'
 
 describe('<Command>', () => {
   it('renders children', () => {
@@ -22,9 +22,7 @@ describe('<Command>', () => {
 
   it('forwards label as aria-label', () => {
     const { container } = render(<Command label="My Menu" />)
-    expect(container.querySelector('[cmdk-root]')?.getAttribute('aria-label')).toBe(
-      'My Menu',
-    )
+    expect(container.querySelector('[cmdk-root]')?.getAttribute('aria-label')).toBe('My Menu')
   })
 })
 

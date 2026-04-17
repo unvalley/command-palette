@@ -100,9 +100,7 @@ describe('<Command.Item>', () => {
       </Command>,
     )
     fireEvent.pointerMove(screen.getByText('B'))
-    expect(
-      screen.getByText('B').closest('[cmdk-item]')?.getAttribute('data-selected'),
-    ).toBe('true')
+    expect(screen.getByText('B').closest('[cmdk-item]')?.getAttribute('data-selected')).toBe('true')
   })
 
   it('pointerSelection="click" does NOT update value on pointer move (#49)', () => {
@@ -113,8 +111,8 @@ describe('<Command.Item>', () => {
       </Command>,
     )
     fireEvent.pointerMove(screen.getByText('B'))
-    expect(
-      screen.getByText('B').closest('[cmdk-item]')?.getAttribute('data-selected'),
-    ).not.toBe('true')
+    expect(screen.getByText('B').closest('[cmdk-item]')?.getAttribute('data-selected')).not.toBe(
+      'true',
+    )
   })
 })
