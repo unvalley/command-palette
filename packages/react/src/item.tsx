@@ -3,11 +3,12 @@ import {
   type MouseEvent,
   type ReactNode,
   type Ref,
+  useContext,
   useEffect,
   useId,
   useRef,
 } from 'react'
-import { useCommandSlice, useCommandStore } from './context'
+import { GroupContext, useCommandSlice, useCommandStore } from './context'
 
 export type CommandItemProps = Omit<HTMLAttributes<HTMLDivElement>, 'onSelect'> & {
   ref?: Ref<HTMLDivElement>
@@ -26,13 +27,16 @@ export const CommandItem = ({
   keywords,
   disabled,
   forceMount,
-  groupId,
+  groupId: groupIdProp,
   onSelect,
   children,
   ...rest
 }: CommandItemProps) => {
   const store = useCommandStore()
   const id = useId()
+  // Prop wins; otherwise inherit from the nearest <CommandGroup>.
+  const inheritedGroupId = useContext(GroupContext)
+  const groupId = groupIdProp ?? inheritedGroupId ?? undefined
 
   // Stable refs so the registered onSelect always sees the latest closure.
   const onSelectRef = useRef(onSelect)

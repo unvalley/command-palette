@@ -1,5 +1,5 @@
 import { type HTMLAttributes, type ReactNode, type Ref, useEffect, useId } from 'react'
-import { useCommandSlice, useCommandStore } from './context'
+import { GroupContext, useCommandSlice, useCommandStore } from './context'
 
 export type CommandGroupProps = HTMLAttributes<HTMLDivElement> & {
   ref?: Ref<HTMLDivElement>
@@ -37,7 +37,7 @@ export const CommandGroup = ({
         </div>
       )}
       <div cmdk-group-items="" role="group" aria-labelledby={heading != null ? id : undefined}>
-        {children}
+        <GroupContext.Provider value={id}>{children}</GroupContext.Provider>
       </div>
     </div>
   )

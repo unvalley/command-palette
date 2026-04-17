@@ -80,8 +80,9 @@ export const App = () => {
           <p className="muted">Select a command — activity will appear here.</p>
         ) : (
           <ul className="log">
-            {log.map((line, i) => (
-              <li key={`${line}-${i}`}>{line}</li>
+            {log.map((line) => (
+              // biome-ignore lint/suspicious/noArrayIndexKey: log entries embed their own timestamp making them effectively unique
+              <li key={line}>{line}</li>
             ))}
           </ul>
         )}
