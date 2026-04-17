@@ -39,6 +39,31 @@ describe('createCommand: controlled mode', () => {
     const cmd = createCommand({ search: 'foo' })
     expect(cmd.getState().search).toBe('foo')
   })
+
+  it('updates filter-related options after creation', () => {
+    const cmd = createCommand({ filterMode: 'none' })
+    cmd.registerItem({ value: 'apple' })
+    cmd.registerItem({ value: 'banana' })
+    cmd.setSearch('app')
+    expect(cmd.getState().filteredOrder).toEqual(['apple', 'banana'])
+
+    cmd.updateOptions({ filterMode: 'contains' })
+    expect(cmd.getState().filteredOrder).toEqual(['apple'])
+  })
+
+  it('uses the latest callbacks after updating options', () => {
+    const first = vi.fn()
+    const second = vi.fn()
+    const cmd = createCommand({ onValueChange: first })
+    cmd.registerItem({ value: 'apple' })
+
+    cmd.setValue('apple')
+    expect(first).toHaveBeenCalledWith('apple')
+
+    cmd.updateOptions({ onValueChange: second })
+    cmd.setValue('')
+    expect(second).toHaveBeenCalledWith('')
+  })
 })
 
 describe('createCommand: subscribeSlice', () => {

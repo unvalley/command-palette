@@ -52,6 +52,14 @@ describe('createCommand: search + filter', () => {
     expect(cmd.getState().filteredOrder).toEqual(['apple', 'pineapple'])
   })
 
+  it('contains mode prefers boundary matches over inline matches', () => {
+    const cmd = createCommand({ filterMode: 'contains' })
+    cmd.registerItem({ value: 'foo/bar' })
+    cmd.registerItem({ value: 'foobar' })
+    cmd.setSearch('bar')
+    expect(cmd.getState().filteredOrder).toEqual(['foo/bar', 'foobar'])
+  })
+
   it('forceMount keeps item visible even with non-matching search', () => {
     const cmd = createCommand()
     cmd.registerItem({ value: 'apple' })

@@ -13,9 +13,12 @@ import type {
 const isDev = process.env.NODE_ENV !== 'production'
 
 export const createCommand = (options: CommandOptions = {}): CommandStore => {
-  const filterMode = options.filterMode ?? 'fuzzy'
-  const filter = filterMode === 'none' ? null : options.filter
-  const pointerSelection = options.pointerSelection ?? 'hover'
+  let filterMode = options.filterMode ?? 'fuzzy'
+  let filter = filterMode === 'none' ? null : options.filter
+  let loop = options.loop ?? false
+  let pointerSelection = options.pointerSelection ?? 'hover'
+  let onValueChange = options.onValueChange
+  let onSearchChange = options.onSearchChange
 
   let nextOrder = 0
   const items = new Map<string, ItemData>()
@@ -117,7 +120,7 @@ export const createCommand = (options: CommandOptions = {}): CommandStore => {
         value = next
         // Notify synchronously — the caller (e.g. setSearch, registerItem) will call
         // notify() afterwards, so subscribers observe the corrected state.
-        options.onValueChange?.(value)
+        onValueChange?.(value)
       }
     }
   }
@@ -216,6 +219,41 @@ export const createCommand = (options: CommandOptions = {}): CommandStore => {
     notify()
   }
 
+  const updateOptions = (
+    patch: Partial<
+      Pick<
+        CommandOptions,
+        'filter' | 'filterMode' | 'loop' | 'pointerSelection' | 'onSearchChange' | 'onValueChange'
+      >
+    >,
+  ): void => {
+    const nextFilterMode = 'filterMode' in patch ? (patch.filterMode ?? 'fuzzy') : filterMode
+    const nextFilter = nextFilterMode === 'none' ? null : 'filter' in patch ? patch.filter : filter
+    const nextLoop = 'loop' in patch ? (patch.loop ?? false) : loop
+    const nextPointerSelection =
+      'pointerSelection' in patch ? (patch.pointerSelection ?? 'hover') : pointerSelection
+    const nextOnValueChange = 'onValueChange' in patch ? patch.onValueChange : onValueChange
+    const nextOnSearchChange = 'onSearchChange' in patch ? patch.onSearchChange : onSearchChange
+
+    const needsRecompute = nextFilterMode !== filterMode || nextFilter !== filter
+    const needsNotify = needsRecompute || nextPointerSelection !== pointerSelection
+
+    filterMode = nextFilterMode
+    filter = nextFilter
+    loop = nextLoop
+    pointerSelection = nextPointerSelection
+    onValueChange = nextOnValueChange
+    onSearchChange = nextOnSearchChange
+
+    if (!needsNotify) return
+
+    if (needsRecompute) {
+      recompute()
+    }
+
+    notify()
+  }
+
   const subscribe = (listener: () => void): (() => void) => {
     listeners.add(listener)
     return () => {
@@ -242,7 +280,7 @@ export const createCommand = (options: CommandOptions = {}): CommandStore => {
     if (next === search) return
     search = next
     recompute()
-    options.onSearchChange?.(search)
+    onSearchChange?.(search)
     notify()
   }
 
@@ -250,7 +288,7 @@ export const createCommand = (options: CommandOptions = {}): CommandStore => {
     if (next === value) return
     if (next !== '') hasBeenSelected = true
     value = next
-    options.onValueChange?.(value)
+    onValueChange?.(value)
     notify()
   }
 
@@ -277,7 +315,7 @@ export const createCommand = (options: CommandOptions = {}): CommandStore => {
     }
     const nextIdx = idx + 1
     if (nextIdx >= navigableOrder.length) {
-      if (options.loop) {
+      if (loop) {
         const first = navigableOrder[0]
         if (first !== undefined) setValue(first)
       }
@@ -296,7 +334,7 @@ export const createCommand = (options: CommandOptions = {}): CommandStore => {
     }
     const prevIdx = idx - 1
     if (prevIdx < 0) {
-      if (options.loop) {
+      if (loop) {
         const last = navigableOrder[navigableOrder.length - 1]
         if (last !== undefined) setValue(last)
       }
@@ -337,6 +375,7 @@ export const createCommand = (options: CommandOptions = {}): CommandStore => {
     registerItem,
     registerGroup,
     updateItem,
+    updateOptions,
     setSearch,
     setValue,
     setComposing,

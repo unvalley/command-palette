@@ -61,9 +61,9 @@ export const CommandItem = ({
     store.updateItem(value, { keywords, disabled, forceMount, groupId })
   }, [store, value, keywords, disabled, forceMount, groupId])
 
-  const isVisible = useCommandSlice((s) => s.getState().visibleSet.has(value))
-  const isSelected = useCommandSlice((s) => s.getState().value === value)
-  const pointerMode = useCommandSlice((s) => s.getState().pointerSelection)
+  const isVisible = useCommandSlice((s) => s.visibleSet.has(value))
+  const isSelected = useCommandSlice((s) => s.value === value)
+  const pointerMode = useCommandSlice((s) => s.pointerSelection)
 
   if (!isVisible) return null
 

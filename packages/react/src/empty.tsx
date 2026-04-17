@@ -7,7 +7,7 @@ export type CommandEmptyProps = HTMLAttributes<HTMLDivElement> & {
 }
 
 export const CommandEmpty = ({ ref, children, ...rest }: CommandEmptyProps) => {
-  const isEmpty = useCommandSlice((s) => s.getState().filteredOrder.length === 0)
+  const isEmpty = useCommandSlice((s) => s.filteredOrder.length === 0)
   if (!isEmpty) return null
   return (
     <div ref={ref} cmdk-empty="" role="presentation" {...rest}>

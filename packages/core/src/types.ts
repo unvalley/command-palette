@@ -84,6 +84,14 @@ export type CommandStore = {
   registerItem: (item: ItemInput) => () => void
   registerGroup: (group: GroupInput) => () => void
   updateItem: (value: string, patch: Partial<Omit<ItemInput, 'value'>>) => void
+  updateOptions: (
+    options: Partial<
+      Pick<
+        CommandOptions,
+        'filter' | 'filterMode' | 'loop' | 'pointerSelection' | 'onSearchChange' | 'onValueChange'
+      >
+    >,
+  ) => void
 
   // State mutations
   setSearch: (search: string) => void

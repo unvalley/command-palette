@@ -21,8 +21,8 @@ export const CommandInput = ({
   ...rest
 }: CommandInputProps) => {
   const store = useCommandStore()
-  const search = useCommandSlice((s) => s.getState().search)
-  const hasVisibleItems = useCommandSlice((s) => s.getState().filteredOrder.length > 0)
+  const search = useCommandSlice((s) => s.search)
+  const hasVisibleItems = useCommandSlice((s) => s.filteredOrder.length > 0)
   const pendingValueRef = useRef<string>('')
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>): void => {

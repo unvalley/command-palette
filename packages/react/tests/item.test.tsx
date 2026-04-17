@@ -116,4 +116,28 @@ describe('<Command.Item>', () => {
       'true',
     )
   })
+
+  it('updates pointerSelection after rerender', () => {
+    const { rerender } = render(
+      <Command pointerSelection="click">
+        <CommandItem value="a">A</CommandItem>
+        <CommandItem value="b">B</CommandItem>
+      </Command>,
+    )
+
+    fireEvent.pointerMove(screen.getByText('B'))
+    expect(screen.getByText('B').closest('[cmdk-item]')?.getAttribute('data-selected')).not.toBe(
+      'true',
+    )
+
+    rerender(
+      <Command pointerSelection="hover">
+        <CommandItem value="a">A</CommandItem>
+        <CommandItem value="b">B</CommandItem>
+      </Command>,
+    )
+
+    fireEvent.pointerMove(screen.getByText('B'))
+    expect(screen.getByText('B').closest('[cmdk-item]')?.getAttribute('data-selected')).toBe('true')
+  })
 })

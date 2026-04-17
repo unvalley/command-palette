@@ -160,8 +160,16 @@ export const commandScorePrepared = (
     {},
   )
 
-const wordBoundaryIndex = (haystack: string, needle: string): number =>
-  haystack.indexOf(` ${needle}`)
+const hasWordBoundaryMatch = (haystack: string, needle: string): boolean => {
+  let index = haystack.indexOf(needle)
+  while (index >= 0) {
+    if (index === 0) return true
+    const previousChar = haystack.charAt(index - 1)
+    if (IS_SPACE_REGEXP.test(previousChar) || IS_GAP_REGEXP.test(previousChar)) return true
+    index = haystack.indexOf(needle, index + 1)
+  }
+  return false
+}
 
 export const commandContainsScorePrepared = (
   prepared: PreparedCommandScoreHaystack,
@@ -169,7 +177,7 @@ export const commandContainsScorePrepared = (
 ): number => {
   if (normalizedAbbreviation === '') return 1
   if (prepared.normalizedHaystack.startsWith(normalizedAbbreviation)) return 1
-  if (wordBoundaryIndex(prepared.normalizedHaystack, normalizedAbbreviation) >= 0) return 0.95
+  if (hasWordBoundaryMatch(prepared.normalizedHaystack, normalizedAbbreviation)) return 0.95
   if (prepared.normalizedHaystack.includes(normalizedAbbreviation)) return 0.9
   return 0
 }

@@ -34,6 +34,25 @@ export const Command = ({ label, className, children, ...options }: CommandProps
     }
   }, [store, searchProp])
 
+  useEffect(() => {
+    store.updateOptions({
+      filter: options.filter,
+      filterMode: options.filterMode,
+      loop: options.loop,
+      onSearchChange: options.onSearchChange,
+      onValueChange: options.onValueChange,
+      pointerSelection: options.pointerSelection,
+    })
+  }, [
+    store,
+    options.filter,
+    options.filterMode,
+    options.loop,
+    options.onSearchChange,
+    options.onValueChange,
+    options.pointerSelection,
+  ])
+
   const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>): void => {
     if (store.getState().isComposing) return
     switch (e.key) {

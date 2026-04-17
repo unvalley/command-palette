@@ -20,7 +20,7 @@ export const CommandGroup = ({
 
   useEffect(() => store.registerGroup({ id, forceMount }), [store, id, forceMount])
 
-  const isVisible = useCommandSlice((s) => s.getState().visibleGroups.has(id))
+  const isVisible = useCommandSlice((s) => s.visibleGroups.has(id))
 
   return (
     <div

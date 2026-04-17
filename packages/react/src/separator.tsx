@@ -7,7 +7,7 @@ export type CommandSeparatorProps = HTMLAttributes<HTMLDivElement> & {
 }
 
 export const CommandSeparator = ({ ref, alwaysRender, ...rest }: CommandSeparatorProps) => {
-  const search = useCommandSlice((s) => s.getState().search)
+  const search = useCommandSlice((s) => s.search)
   if (!alwaysRender && search !== '') return null
   // biome-ignore lint/a11y/useFocusableInteractive: separator is a visual divider, not interactive
   return <div ref={ref} cmdk-separator="" role="separator" {...rest} />

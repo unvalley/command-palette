@@ -82,4 +82,26 @@ describe('keyboard navigation', () => {
     fireEvent.keyDown(input, { key: 'ArrowDown' })
     expect(selected()).toBe('A')
   })
+
+  it('updates loop behavior after rerender', () => {
+    const view = setup({ loop: false })
+    const input = screen.getByPlaceholderText('Search')
+    fireEvent.keyDown(input, { key: 'End' })
+    fireEvent.keyDown(input, { key: 'ArrowDown' })
+    expect(selected()).toBe('C')
+
+    view.rerender(
+      <Command loop>
+        <CommandInput placeholder="Search" />
+        <CommandList>
+          <CommandItem value="a">A</CommandItem>
+          <CommandItem value="b">B</CommandItem>
+          <CommandItem value="c">C</CommandItem>
+        </CommandList>
+      </Command>,
+    )
+
+    fireEvent.keyDown(input, { key: 'ArrowDown' })
+    expect(selected()).toBe('A')
+  })
 })

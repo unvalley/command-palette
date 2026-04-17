@@ -1,4 +1,4 @@
-import type { CommandStore } from '@unvalley/cmdk-core'
+import type { CommandState, CommandStore } from '@unvalley/cmdk-core'
 import { createContext, useCallback, useContext, useSyncExternalStore } from 'react'
 
 export const CommandContext = createContext<CommandStore | null>(null)
@@ -19,22 +19,19 @@ export const useCommandStore = (): CommandStore => {
 }
 
 /**
- * Subscribe to a slice of command state. The selector should return a
+ * Subscribe to a slice of command state. The selector receives the current
+ * state object and should return a
  * primitive (or stable reference) — React compares with Object.is and skips
  * re-renders when the slice is unchanged. This is what fixes #377
  * (re-renders on every hover) when used per-item.
  */
-export const useCommandSlice = <T>(selector: (store: CommandStore) => T): T => {
+export const useCommandSlice = <T>(selector: (state: CommandState) => T): T => {
   const store = useCommandStore()
   const subscribe = useCallback(
-    (onStoreChange: () => void) =>
-      store.subscribeSlice(
-        () => selector(store),
-        () => onStoreChange(),
-      ),
+    (onStoreChange: () => void) => store.subscribeSlice(selector, () => onStoreChange()),
     [store, selector],
   )
-  const getSnapshot = useCallback(() => selector(store), [store, selector])
+  const getSnapshot = useCallback(() => selector(store.getState()), [store, selector])
 
   return useSyncExternalStore(subscribe, getSnapshot, getSnapshot)
 }
