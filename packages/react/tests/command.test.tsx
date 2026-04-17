@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { Command } from '../src/command'
 import { Input } from '../src/input'
+import { Command as CompoundCommand } from '../src/index'
 
 describe('<Command>', () => {
   it('renders children', () => {
@@ -54,5 +55,17 @@ describe('<Command.Input>', () => {
     fireEvent.change(input, { target: { value: 'こんにちは' } })
     fireEvent.compositionEnd(input)
     expect(onSearchChange).toHaveBeenCalledWith('こんにちは')
+  })
+})
+
+describe('compound API', () => {
+  it('Command.Input/List/Item/Group/Empty/Loading/Separator are accessible', () => {
+    expect(CompoundCommand.Input).toBeDefined()
+    expect(CompoundCommand.List).toBeDefined()
+    expect(CompoundCommand.Item).toBeDefined()
+    expect(CompoundCommand.Group).toBeDefined()
+    expect(CompoundCommand.Empty).toBeDefined()
+    expect(CompoundCommand.Loading).toBeDefined()
+    expect(CompoundCommand.Separator).toBeDefined()
   })
 })
