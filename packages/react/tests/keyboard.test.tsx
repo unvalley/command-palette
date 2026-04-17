@@ -1,19 +1,19 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { Command } from '../src/command'
-import { Input } from '../src/input'
-import { Item } from '../src/item'
-import { List } from '../src/list'
+import { CommandInput } from '../src/input'
+import { CommandItem } from '../src/item'
+import { CommandList } from '../src/list'
 
 function setup(props?: Parameters<typeof Command>[0]) {
   return render(
     <Command {...props}>
-      <Input placeholder="Search" />
-      <List>
-        <Item value="a">A</Item>
-        <Item value="b">B</Item>
-        <Item value="c">C</Item>
-      </List>
+      <CommandInput placeholder="Search" />
+      <CommandList>
+        <CommandItem value="a">A</CommandItem>
+        <CommandItem value="b">B</CommandItem>
+        <CommandItem value="c">C</CommandItem>
+      </CommandList>
     </Command>,
   )
 }
@@ -61,12 +61,12 @@ describe('keyboard navigation', () => {
     const onSelect = vi.fn()
     render(
       <Command>
-        <Input placeholder="Search" />
-        <List>
-          <Item value="a" onSelect={onSelect}>
+        <CommandInput placeholder="Search" />
+        <CommandList>
+          <CommandItem value="a" onSelect={onSelect}>
             A
-          </Item>
-        </List>
+          </CommandItem>
+        </CommandList>
       </Command>,
     )
     const input = screen.getByPlaceholderText('Search')

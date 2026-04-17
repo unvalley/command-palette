@@ -1,13 +1,13 @@
 import { act, fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { Command } from '../src/command'
-import { Item } from '../src/item'
+import { CommandItem } from '../src/item'
 
 describe('<Command.Item>', () => {
   it('renders with cmdk-item attribute', () => {
     render(
       <Command>
-        <Item value="apple">Apple</Item>
+        <CommandItem value="apple">Apple</CommandItem>
       </Command>,
     )
     expect(screen.getByText('Apple').closest('[cmdk-item]')).toBeInTheDocument()
@@ -17,9 +17,9 @@ describe('<Command.Item>', () => {
     const onSelect = vi.fn()
     render(
       <Command>
-        <Item value="apple" onSelect={onSelect}>
+        <CommandItem value="apple" onSelect={onSelect}>
           Apple
-        </Item>
+        </CommandItem>
       </Command>,
     )
     fireEvent.click(screen.getByText('Apple'))
@@ -30,9 +30,9 @@ describe('<Command.Item>', () => {
     const onSelect = vi.fn()
     render(
       <Command>
-        <Item value="apple" onSelect={onSelect}>
+        <CommandItem value="apple" onSelect={onSelect}>
           Apple
-        </Item>
+        </CommandItem>
       </Command>,
     )
     fireEvent.click(screen.getByText('Apple'))
@@ -42,8 +42,8 @@ describe('<Command.Item>', () => {
   it('sets data-selected on the highlighted item', () => {
     render(
       <Command value="apple">
-        <Item value="apple">Apple</Item>
-        <Item value="banana">Banana</Item>
+        <CommandItem value="apple">Apple</CommandItem>
+        <CommandItem value="banana">Banana</CommandItem>
       </Command>,
     )
     const apple = screen.getByText('Apple').closest('[cmdk-item]')
@@ -55,9 +55,9 @@ describe('<Command.Item>', () => {
   it('sets data-disabled on disabled items', async () => {
     render(
       <Command>
-        <Item value="apple" disabled>
+        <CommandItem value="apple" disabled>
           Apple
-        </Item>
+        </CommandItem>
       </Command>,
     )
     await act(async () => {})
@@ -68,7 +68,7 @@ describe('<Command.Item>', () => {
   it('hides item when filtered out', () => {
     const { container } = render(
       <Command search="xyz">
-        <Item value="apple">Apple</Item>
+        <CommandItem value="apple">Apple</CommandItem>
       </Command>,
     )
     expect(container.querySelector('[cmdk-item]')).not.toBeInTheDocument()
@@ -77,7 +77,7 @@ describe('<Command.Item>', () => {
   it('renders item with empty-string value (#357)', () => {
     render(
       <Command>
-        <Item value="">All</Item>
+        <CommandItem value="">All</CommandItem>
       </Command>,
     )
     expect(screen.getByText('All').closest('[cmdk-item]')).toBeInTheDocument()
@@ -87,7 +87,7 @@ describe('<Command.Item>', () => {
     expect(() =>
       render(
         <Command>
-          <Item value="<script>alert(1)</script>">XSS</Item>
+          <CommandItem value="<script>alert(1)</script>">XSS</CommandItem>
         </Command>,
       ),
     ).not.toThrow()
@@ -96,8 +96,8 @@ describe('<Command.Item>', () => {
   it('pointerSelection="hover" updates value on pointer move (default)', () => {
     render(
       <Command>
-        <Item value="a">A</Item>
-        <Item value="b">B</Item>
+        <CommandItem value="a">A</CommandItem>
+        <CommandItem value="b">B</CommandItem>
       </Command>,
     )
     fireEvent.pointerMove(screen.getByText('B'))
@@ -107,8 +107,8 @@ describe('<Command.Item>', () => {
   it('pointerSelection="click" does NOT update value on pointer move (#49)', () => {
     render(
       <Command pointerSelection="click">
-        <Item value="a">A</Item>
-        <Item value="b">B</Item>
+        <CommandItem value="a">A</CommandItem>
+        <CommandItem value="b">B</CommandItem>
       </Command>,
     )
     fireEvent.pointerMove(screen.getByText('B'))

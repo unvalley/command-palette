@@ -1,14 +1,20 @@
 import { type HTMLAttributes, type ReactNode, type Ref, useEffect, useId } from 'react'
 import { useCommandSlice, useCommandStore } from './context'
 
-export type GroupProps = HTMLAttributes<HTMLDivElement> & {
+export type CommandGroupProps = HTMLAttributes<HTMLDivElement> & {
   ref?: Ref<HTMLDivElement>
   heading?: ReactNode
   forceMount?: boolean
   children?: ReactNode
 }
 
-export const Group = ({ ref, heading, forceMount, children, ...rest }: GroupProps) => {
+export const CommandGroup = ({
+  ref,
+  heading,
+  forceMount,
+  children,
+  ...rest
+}: CommandGroupProps) => {
   const store = useCommandStore()
   const id = useId()
 

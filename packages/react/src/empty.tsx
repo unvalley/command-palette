@@ -1,12 +1,12 @@
 import type { HTMLAttributes, ReactNode, Ref } from 'react'
 import { useCommandSlice } from './context'
 
-export type EmptyProps = HTMLAttributes<HTMLDivElement> & {
+export type CommandEmptyProps = HTMLAttributes<HTMLDivElement> & {
   ref?: Ref<HTMLDivElement>
   children?: ReactNode
 }
 
-export const Empty = ({ ref, children, ...rest }: EmptyProps) => {
+export const CommandEmpty = ({ ref, children, ...rest }: CommandEmptyProps) => {
   const isEmpty = useCommandSlice((s) => s.getState().filteredOrder.length === 0)
   if (!isEmpty) return null
   return (

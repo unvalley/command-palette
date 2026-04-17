@@ -1,11 +1,11 @@
 import type { HTMLAttributes, ReactNode, Ref } from 'react'
 
-export type ListProps = HTMLAttributes<HTMLDivElement> & {
+export type CommandListProps = HTMLAttributes<HTMLDivElement> & {
   ref?: Ref<HTMLDivElement>
   children?: ReactNode
 }
 
-export const List = ({ ref, children, ...rest }: ListProps) => (
+export const CommandList = ({ ref, children, ...rest }: CommandListProps) => (
   <div ref={ref} cmdk-list="" role="listbox" {...rest}>
     {children}
   </div>

@@ -1,13 +1,13 @@
 import type { HTMLAttributes, ReactNode, Ref } from 'react'
 
-export type LoadingProps = HTMLAttributes<HTMLDivElement> & {
+export type CommandLoadingProps = HTMLAttributes<HTMLDivElement> & {
   ref?: Ref<HTMLDivElement>
   /** 0..1 progress; surfaced as aria-valuenow when set. */
   progress?: number
   children?: ReactNode
 }
 
-export const Loading = ({ ref, progress, children, ...rest }: LoadingProps) => (
+export const CommandLoading = ({ ref, progress, children, ...rest }: CommandLoadingProps) => (
   <div
     ref={ref}
     cmdk-loading=""

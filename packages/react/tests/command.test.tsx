@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { Command } from '../src/command'
 import * as cmdk from '../src/index'
-import { Input } from '../src/input'
+import { CommandInput } from '../src/input'
 
 describe('<Command>', () => {
   it('renders children', () => {
@@ -31,7 +31,7 @@ describe('<Command.Input>', () => {
     const onSearchChange = vi.fn()
     render(
       <Command onSearchChange={onSearchChange}>
-        <Input placeholder="Search" />
+        <CommandInput placeholder="Search" />
       </Command>,
     )
     const input = screen.getByPlaceholderText('Search')
@@ -43,7 +43,7 @@ describe('<Command.Input>', () => {
     const onSearchChange = vi.fn()
     render(
       <Command onSearchChange={onSearchChange}>
-        <Input placeholder="Search" />
+        <CommandInput placeholder="Search" />
       </Command>,
     )
     const input = screen.getByPlaceholderText('Search') as HTMLInputElement
@@ -59,13 +59,13 @@ describe('<Command.Input>', () => {
 describe('public exports', () => {
   it('exposes all components as named exports', () => {
     expect(cmdk.Command).toBeDefined()
-    expect(cmdk.Input).toBeDefined()
-    expect(cmdk.List).toBeDefined()
-    expect(cmdk.Item).toBeDefined()
-    expect(cmdk.Group).toBeDefined()
-    expect(cmdk.Empty).toBeDefined()
-    expect(cmdk.Loading).toBeDefined()
-    expect(cmdk.Separator).toBeDefined()
+    expect(cmdk.CommandInput).toBeDefined()
+    expect(cmdk.CommandList).toBeDefined()
+    expect(cmdk.CommandItem).toBeDefined()
+    expect(cmdk.CommandGroup).toBeDefined()
+    expect(cmdk.CommandEmpty).toBeDefined()
+    expect(cmdk.CommandLoading).toBeDefined()
+    expect(cmdk.CommandSeparator).toBeDefined()
     expect(cmdk.useCommandStore).toBeDefined()
     expect(cmdk.useCommandSlice).toBeDefined()
   })

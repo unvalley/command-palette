@@ -2,8 +2,8 @@ import { act, render, screen } from '@testing-library/react'
 import { useEffect, useState } from 'react'
 import { describe, expect, it } from 'vitest'
 import { Command } from '../src/command'
-import { Item } from '../src/item'
-import { List } from '../src/list'
+import { CommandItem } from '../src/item'
+import { CommandList } from '../src/list'
 
 describe('async items (regressions)', () => {
   it('async items render correctly when added after mount (#280)', async () => {
@@ -14,13 +14,13 @@ describe('async items (regressions)', () => {
       }, [])
       return (
         <Command>
-          <List>
+          <CommandList>
             {items.map((v) => (
-              <Item key={v} value={v}>
+              <CommandItem key={v} value={v}>
                 {v}
-              </Item>
+              </CommandItem>
             ))}
-          </List>
+          </CommandList>
         </Command>
       )
     }
@@ -37,13 +37,13 @@ describe('async items (regressions)', () => {
     function Demo({ items }: { items: string[] }) {
       return (
         <Command>
-          <List>
+          <CommandList>
             {items.map((v) => (
-              <Item key={v} value={v}>
+              <CommandItem key={v} value={v}>
                 {v}
-              </Item>
+              </CommandItem>
             ))}
-          </List>
+          </CommandList>
         </Command>
       )
     }

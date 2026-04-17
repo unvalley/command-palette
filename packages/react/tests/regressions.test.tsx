@@ -2,8 +2,8 @@ import { fireEvent, render, screen } from '@testing-library/react'
 import { useRef } from 'react'
 import { describe, expect, it } from 'vitest'
 import { Command } from '../src/command'
-import { Item } from '../src/item'
-import { List } from '../src/list'
+import { CommandItem } from '../src/item'
+import { CommandList } from '../src/list'
 
 describe('regression: per-item render count', () => {
   it('hovering item B does not re-render item A (#377)', () => {
@@ -14,15 +14,15 @@ describe('regression: per-item render count', () => {
       const count = useRef(0)
       count.current++
       renderCounts[label] = count.current
-      return <Item value={value}>{value}</Item>
+      return <CommandItem value={value}>{value}</CommandItem>
     }
 
     render(
       <Command>
-        <List>
+        <CommandList>
           <CountingItem value="a" label="a" />
           <CountingItem value="b" label="b" />
-        </List>
+        </CommandList>
       </Command>,
     )
 

@@ -1,7 +1,10 @@
 import { type ChangeEvent, type CompositionEvent, type Ref, useRef } from 'react'
 import { useCommandSlice, useCommandStore } from './context'
 
-export type InputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange'> & {
+export type CommandInputProps = Omit<
+  React.InputHTMLAttributes<HTMLInputElement>,
+  'value' | 'onChange'
+> & {
   ref?: Ref<HTMLInputElement>
   /** Override the displayed value. If omitted, the store's search is used. */
   value?: string
@@ -9,14 +12,14 @@ export type InputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'valu
   onValueChange?: (value: string) => void
 }
 
-export const Input = ({
+export const CommandInput = ({
   ref,
   value,
   onValueChange,
   onCompositionStart,
   onCompositionEnd,
   ...rest
-}: InputProps) => {
+}: CommandInputProps) => {
   const store = useCommandStore()
   const search = useCommandSlice((s) => s.getState().search)
   const hasVisibleItems = useCommandSlice((s) => s.getState().filteredOrder.length > 0)

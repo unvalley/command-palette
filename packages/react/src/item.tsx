@@ -9,7 +9,7 @@ import {
 } from 'react'
 import { useCommandSlice, useCommandStore } from './context'
 
-export type ItemProps = Omit<HTMLAttributes<HTMLDivElement>, 'onSelect'> & {
+export type CommandItemProps = Omit<HTMLAttributes<HTMLDivElement>, 'onSelect'> & {
   ref?: Ref<HTMLDivElement>
   value: string
   keywords?: readonly string[]
@@ -20,7 +20,7 @@ export type ItemProps = Omit<HTMLAttributes<HTMLDivElement>, 'onSelect'> & {
   children?: ReactNode
 }
 
-export const Item = ({
+export const CommandItem = ({
   ref,
   value,
   keywords,
@@ -30,7 +30,7 @@ export const Item = ({
   onSelect,
   children,
   ...rest
-}: ItemProps) => {
+}: CommandItemProps) => {
   const store = useCommandStore()
   const id = useId()
 
