@@ -1,0 +1,236 @@
+:root {
+  --bg: #0b0b10;
+  --bg-elevated: #16161d;
+  --bg-hover: #1f1f29;
+  --border: #272733;
+  --fg: #e8e8ea;
+  --fg-muted: #8d8d99;
+  --accent: #7c7cff;
+  --radius: 10px;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 14px/1.5 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+.page {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 48px 24px 96px;
+  display: grid;
+  gap: 32px;
+}
+
+h1 {
+  margin: 0 0 4px;
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+h2 {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--fg-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+header p {
+  margin: 0;
+  color: var(--fg-muted);
+}
+
+code {
+  background: var(--bg-elevated);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.muted {
+  color: var(--fg-muted);
+  margin: 4px 0 12px;
+}
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.trigger {
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: var(--radius);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  transition: filter 0.15s;
+}
+
+.trigger:hover {
+  filter: brightness(1.1);
+}
+
+.hint {
+  margin: 0;
+  color: var(--fg-muted);
+  font-size: 13px;
+}
+
+kbd {
+  display: inline-block;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 6px;
+  font: 12px/1 -apple-system, monospace;
+  min-width: 20px;
+  text-align: center;
+}
+
+.log {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 4px;
+  font-family: 'SF Mono', ui-monospace, monospace;
+  font-size: 12px;
+  color: var(--fg-muted);
+}
+
+/* ---- Command menu primitives ---- */
+
+[cmdk-root] {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  max-width: 560px;
+  width: 100%;
+}
+
+.inline-wrap [cmdk-root] {
+  min-height: 320px;
+  display: flex;
+  flex-direction: column;
+}
+
+[cmdk-input] {
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: var(--fg);
+  font: inherit;
+  padding: 14px 16px;
+  outline: none;
+  border-bottom: 1px solid var(--border);
+}
+
+[cmdk-input]::placeholder {
+  color: var(--fg-muted);
+}
+
+[cmdk-list] {
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+.inline-wrap [cmdk-list] {
+  flex: 1;
+}
+
+[cmdk-group] {
+  padding: 4px 0;
+}
+
+[cmdk-group-heading] {
+  padding: 8px 12px 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--fg-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+[cmdk-separator] {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 0;
+}
+
+[cmdk-item] {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  user-select: none;
+  color: var(--fg);
+}
+
+[cmdk-item][data-selected='true'] {
+  background: var(--bg-hover);
+  color: var(--fg);
+}
+
+[cmdk-item][data-disabled='true'] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.hint-mono {
+  font-family: 'SF Mono', ui-monospace, monospace;
+  font-size: 11px;
+  color: var(--fg-muted);
+  background: var(--bg);
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+}
+
+[cmdk-empty] {
+  padding: 24px;
+  text-align: center;
+  color: var(--fg-muted);
+  font-size: 13px;
+}
+
+/* ---- Dialog ---- */
+
+[cmdk-dialog] {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  margin: auto;
+  width: min(560px, calc(100vw - 32px));
+  box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.6);
+}
+
+[cmdk-dialog]::backdrop {
+  background: rgba(5, 5, 8, 0.6);
+  backdrop-filter: blur(4px);
+}
+
+[cmdk-dialog] [cmdk-root] {
+  border: none;
+  width: 100%;
+}
