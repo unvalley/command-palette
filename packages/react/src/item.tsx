@@ -41,11 +41,7 @@ export const Item = forwardRef<HTMLDivElement, ItemProps>(function Item(
     store.updateItem(value, { keywords, disabled, forceMount, groupId })
   }, [store, value, keywords, disabled, forceMount, groupId])
 
-  // Disabled items are always rendered (score=0 hides them from visibleSet, but
-  // they should still appear grayed-out). forceMount overrides filter entirely.
-  const isVisible = useCommandSlice(
-    (s) => s.getState().visibleSet.has(value) || !!disabled || !!forceMount,
-  )
+  const isVisible = useCommandSlice((s) => s.getState().visibleSet.has(value))
   const isSelected = useCommandSlice((s) => s.getState().value === value)
   const pointerMode = useCommandSlice((s) => s.getState().pointerSelection)
 

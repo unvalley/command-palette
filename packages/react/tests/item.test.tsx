@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { Command } from '../src/command'
 import { Item } from '../src/item'
@@ -52,7 +52,7 @@ describe('<Command.Item>', () => {
     expect(banana?.getAttribute('data-selected')).toBe(null)
   })
 
-  it('sets data-disabled on disabled items', () => {
+  it('sets data-disabled on disabled items', async () => {
     render(
       <Command>
         <Item value="apple" disabled>
@@ -60,6 +60,7 @@ describe('<Command.Item>', () => {
         </Item>
       </Command>,
     )
+    await act(async () => {})
     const apple = screen.getByText('Apple').closest('[cmdk-item]')
     expect(apple?.getAttribute('data-disabled')).toBe('true')
   })

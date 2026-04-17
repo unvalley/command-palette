@@ -30,11 +30,15 @@ export const Group = forwardRef<HTMLDivElement, GroupProps>(function Group(
       {...rest}
     >
       {heading != null && (
-        <div cmdk-group-heading="" aria-hidden="true">
+        <div id={id} cmdk-group-heading="">
           {heading}
         </div>
       )}
-      <div cmdk-group-items="" role="group" aria-labelledby={id}>
+      <div
+        cmdk-group-items=""
+        role="group"
+        aria-labelledby={heading != null ? id : undefined}
+      >
         {children}
       </div>
     </div>

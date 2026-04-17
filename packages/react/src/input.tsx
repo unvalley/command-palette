@@ -21,6 +21,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
 ) {
   const store = useCommandStore()
   const search = useCommandSlice((s) => s.getState().search)
+  const hasVisibleItems = useCommandSlice(
+    (s) => s.getState().filteredOrder.length > 0,
+  )
   const pendingValueRef = useRef<string>('')
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>): void => {
@@ -56,7 +59,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
       cmdk-input=""
       role="combobox"
       aria-autocomplete="list"
-      aria-expanded="true"
+      aria-expanded={hasVisibleItems}
       autoComplete="off"
       autoCorrect="off"
       spellCheck={false}
