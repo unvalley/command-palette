@@ -1,6 +1,6 @@
-# cmdk
+# command-menu
 
-Command menu primitives with framework-specific adapters.
+Library-agnostic command menu primitives. Currently support React.
 
 ## Packages
 
@@ -12,7 +12,7 @@ Command menu primitives with framework-specific adapters.
 ## Install
 
 ```bash
-pnpm add @command-palette/react react react-dom
+pnpm add @command-palette/react
 ```
 
 ## Docs
