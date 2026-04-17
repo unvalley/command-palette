@@ -1,6 +1,6 @@
-# command-menu
+# command-palette
 
-Library-agnostic command menu primitives. Currently support React.
+Library-agnostic command palette primitives. Currently support React.
 
 ## Packages
 
