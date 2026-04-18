@@ -6,7 +6,7 @@ export type CommandListProps = HTMLAttributes<HTMLDivElement> & {
 }
 
 export const CommandList = ({ ref, children, ...rest }: CommandListProps) => (
-  <div ref={ref} cmdk-list="" role="listbox" {...rest}>
+  <div ref={ref} command-palette-list="" role="listbox" {...rest}>
     {children}
   </div>
 )

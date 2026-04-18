@@ -1,4 +1,4 @@
-import type { CommandFilter } from '@unvalley/cmdk-core'
+import type { CommandFilter } from '@command-palette/core'
 import type { ExtractPublicPropTypes, PropType } from 'vue'
 
 export const commandProps = {

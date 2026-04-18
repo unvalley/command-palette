@@ -7,7 +7,6 @@
   "keywords": [
     "command-menu",
     "command-palette",
-    "cmdk",
     "react",
     "ui"
   ],
@@ -25,11 +24,11 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/unvalley/cmdk.git"
+    "url": "git+https://github.com/unvalley/command-palette.git"
   },
-  "homepage": "https://github.com/unvalley/cmdk/tree/main/packages/react#readme",
+  "homepage": "https://github.com/unvalley/command-palette/tree/main/packages/react#readme",
   "bugs": {
-    "url": "https://github.com/unvalley/cmdk/issues"
+    "url": "https://github.com/unvalley/command-palette/issues"
   },
   "scripts": {
     "build": "tsup",
@@ -41,7 +40,7 @@
     "react": "^19.0.0"
   },
   "devDependencies": {
-    "@unvalley/cmdk-core": "workspace:*",
+    "@command-palette/core": "workspace:*",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",

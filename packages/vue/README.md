@@ -164,16 +164,16 @@ const count = useCommandSlice((state) => state.filteredOrder.length)
 
 The package is unstyled. Useful selectors:
 
-- `[cmdk-root]`
-- `[cmdk-dialog]`
-- `[cmdk-input]`
-- `[cmdk-list]`
-- `[cmdk-item]`
-- `[cmdk-group]`
-- `[cmdk-group-heading]`
-- `[cmdk-group-items]`
-- `[cmdk-empty]`
-- `[cmdk-separator]`
-- `[cmdk-loading]`
+- `[command-palette-root]`
+- `[command-palette-dialog]`
+- `[command-palette-input]`
+- `[command-palette-list]`
+- `[command-palette-item]`
+- `[command-palette-group]`
+- `[command-palette-group-heading]`
+- `[command-palette-group-items]`
+- `[command-palette-empty]`
+- `[command-palette-separator]`
+- `[command-palette-loading]`
 - `[data-selected]`
 - `[data-disabled]`

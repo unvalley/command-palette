@@ -107,7 +107,7 @@ export const CommandDialog = ({
   return (
     <dialog
       ref={dialogRef}
-      cmdk-dialog=""
+      command-palette-dialog=""
       className={dialogClassName}
       onClick={handleClick}
       onKeyDown={handleKeyDown}

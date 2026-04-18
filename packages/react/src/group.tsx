@@ -25,18 +25,22 @@ export const CommandGroup = ({
   return (
     <div
       ref={ref}
-      cmdk-group=""
+      command-palette-group=""
       role="presentation"
       hidden={!isVisible || undefined}
       data-group-id={id}
       {...rest}
     >
       {heading != null && (
-        <div id={id} cmdk-group-heading="">
+        <div id={id} command-palette-group-heading="">
           {heading}
         </div>
       )}
-      <div cmdk-group-items="" role="group" aria-labelledby={heading != null ? id : undefined}>
+      <div
+        command-palette-group-items=""
+        role="group"
+        aria-labelledby={heading != null ? id : undefined}
+      >
         <GroupContext.Provider value={id}>{children}</GroupContext.Provider>
       </div>
     </div>

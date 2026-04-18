@@ -58,7 +58,7 @@ export const App = () => {
   return (
     <div className="page">
       <header>
-        <h1>cmdk demo</h1>
+        <h1>command-palette demo</h1>
         <p>
           Framework-agnostic command menu — <code>@command-palette/react</code>
         </p>

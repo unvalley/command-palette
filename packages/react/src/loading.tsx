@@ -10,7 +10,7 @@ export type CommandLoadingProps = HTMLAttributes<HTMLDivElement> & {
 export const CommandLoading = ({ ref, progress, children, ...rest }: CommandLoadingProps) => (
   <div
     ref={ref}
-    cmdk-loading=""
+    command-palette-loading=""
     role="progressbar"
     aria-valuenow={progress != null ? Math.round(progress * 100) : undefined}
     aria-valuemin={0}

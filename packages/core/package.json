@@ -1,5 +1,5 @@
 {
-  "name": "@unvalley/cmdk-core",
+  "name": "@command-palette/core",
   "private": true,
   "version": "0.0.1",
   "description": "Framework-agnostic command-menu store",

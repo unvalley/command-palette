@@ -1,4 +1,4 @@
-import type { CommandState, CommandStore } from '@unvalley/cmdk-core'
+import type { CommandState, CommandStore } from '@command-palette/core'
 import { createContext, useCallback, useContext, useSyncExternalStore } from 'react'
 
 export const CommandContext = createContext<CommandStore | null>(null)
@@ -13,7 +13,7 @@ export const GroupContext = createContext<string | null>(null)
 export const useCommandStore = (): CommandStore => {
   const store = useContext(CommandContext)
   if (!store) {
-    throw new Error('cmdk: component must be rendered inside <Command>')
+    throw new Error('command-palette: component must be rendered inside <Command>')
   }
   return store
 }

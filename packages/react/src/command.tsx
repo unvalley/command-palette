@@ -1,4 +1,4 @@
-import { type CommandFilter, type CommandStore, createCommand } from '@unvalley/cmdk-core'
+import { type CommandFilter, type CommandStore, createCommand } from '@command-palette/core'
 import { type KeyboardEvent, type ReactNode, useEffect, useMemo, useRef } from 'react'
 import { CommandContext } from './context'
 
@@ -101,7 +101,7 @@ export const Command = ({ label, className, children, ...options }: CommandProps
   return (
     <CommandContext.Provider value={store}>
       <div
-        cmdk-root=""
+        command-palette-root=""
         role="application"
         aria-label={label}
         className={className}

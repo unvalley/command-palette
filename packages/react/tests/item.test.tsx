@@ -4,13 +4,13 @@ import { Command } from '../src/command'
 import { CommandItem } from '../src/item'
 
 describe('<Command.Item>', () => {
-  it('renders with cmdk-item attribute', () => {
+  it('renders with command-palette-item attribute', () => {
     render(
       <Command>
         <CommandItem value="apple">Apple</CommandItem>
       </Command>,
     )
-    expect(screen.getByText('Apple').closest('[cmdk-item]')).toBeInTheDocument()
+    expect(screen.getByText('Apple').closest('[command-palette-item]')).toBeInTheDocument()
   })
 
   it('fires onSelect when clicked', () => {
@@ -46,8 +46,8 @@ describe('<Command.Item>', () => {
         <CommandItem value="banana">Banana</CommandItem>
       </Command>,
     )
-    const apple = screen.getByText('Apple').closest('[cmdk-item]')
-    const banana = screen.getByText('Banana').closest('[cmdk-item]')
+    const apple = screen.getByText('Apple').closest('[command-palette-item]')
+    const banana = screen.getByText('Banana').closest('[command-palette-item]')
     expect(apple?.getAttribute('data-selected')).toBe('true')
     expect(banana?.getAttribute('data-selected')).toBe(null)
   })
@@ -61,7 +61,7 @@ describe('<Command.Item>', () => {
       </Command>,
     )
     await act(async () => {})
-    const apple = screen.getByText('Apple').closest('[cmdk-item]')
+    const apple = screen.getByText('Apple').closest('[command-palette-item]')
     expect(apple?.getAttribute('data-disabled')).toBe('true')
   })
 
@@ -71,7 +71,7 @@ describe('<Command.Item>', () => {
         <CommandItem value="apple">Apple</CommandItem>
       </Command>,
     )
-    expect(container.querySelector('[cmdk-item]')).not.toBeInTheDocument()
+    expect(container.querySelector('[command-palette-item]')).not.toBeInTheDocument()
   })
 
   it('renders item with empty-string value (#357)', () => {
@@ -80,7 +80,7 @@ describe('<Command.Item>', () => {
         <CommandItem value="">All</CommandItem>
       </Command>,
     )
-    expect(screen.getByText('All').closest('[cmdk-item]')).toBeInTheDocument()
+    expect(screen.getByText('All').closest('[command-palette-item]')).toBeInTheDocument()
   })
 
   it('renders item with special chars in value without crashing (#387)', () => {
@@ -101,7 +101,9 @@ describe('<Command.Item>', () => {
       </Command>,
     )
     fireEvent.pointerMove(screen.getByText('B'))
-    expect(screen.getByText('B').closest('[cmdk-item]')?.getAttribute('data-selected')).toBe('true')
+    expect(
+      screen.getByText('B').closest('[command-palette-item]')?.getAttribute('data-selected'),
+    ).toBe('true')
   })
 
   it('selectOnHover={false} does not update value on pointer move (#49)', () => {
@@ -112,9 +114,9 @@ describe('<Command.Item>', () => {
       </Command>,
     )
     fireEvent.pointerMove(screen.getByText('B'))
-    expect(screen.getByText('B').closest('[cmdk-item]')?.getAttribute('data-selected')).not.toBe(
-      'true',
-    )
+    expect(
+      screen.getByText('B').closest('[command-palette-item]')?.getAttribute('data-selected'),
+    ).not.toBe('true')
   })
 
   it('updates selectOnHover after rerender', () => {
@@ -126,9 +128,9 @@ describe('<Command.Item>', () => {
     )
 
     fireEvent.pointerMove(screen.getByText('B'))
-    expect(screen.getByText('B').closest('[cmdk-item]')?.getAttribute('data-selected')).not.toBe(
-      'true',
-    )
+    expect(
+      screen.getByText('B').closest('[command-palette-item]')?.getAttribute('data-selected'),
+    ).not.toBe('true')
 
     rerender(
       <Command selectOnHover>
@@ -138,6 +140,8 @@ describe('<Command.Item>', () => {
     )
 
     fireEvent.pointerMove(screen.getByText('B'))
-    expect(screen.getByText('B').closest('[cmdk-item]')?.getAttribute('data-selected')).toBe('true')
+    expect(
+      screen.getByText('B').closest('[command-palette-item]')?.getAttribute('data-selected'),
+    ).toBe('true')
   })
 })

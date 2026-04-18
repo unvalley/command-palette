@@ -18,7 +18,7 @@ describe('<CommandGroup> + <CommandItem>', () => {
       </Command>,
     )
 
-    const group = container.querySelector('[cmdk-group]')
+    const group = container.querySelector('[command-palette-group]')
     expect(group).toBeInTheDocument()
     expect(group?.hasAttribute('hidden')).toBe(false)
   })
@@ -33,7 +33,7 @@ describe('<CommandGroup> + <CommandItem>', () => {
         </CommandList>
       </Command>,
     )
-    const group = container.querySelector('[cmdk-group]')
+    const group = container.querySelector('[command-palette-group]')
     expect(group?.hasAttribute('hidden')).toBe(true)
   })
 
@@ -47,7 +47,7 @@ describe('<CommandGroup> + <CommandItem>', () => {
         </CommandList>
       </Command>,
     )
-    const group = container.querySelector('[cmdk-group]')
+    const group = container.querySelector('[command-palette-group]')
     expect(group?.hasAttribute('hidden')).toBe(false)
   })
 
@@ -64,7 +64,7 @@ describe('<CommandGroup> + <CommandItem>', () => {
       </Command>,
     )
     // Group exists but is hidden because its auto-id has no matching items.
-    const group = container.querySelector('[cmdk-group]')
+    const group = container.querySelector('[command-palette-group]')
     expect(group?.hasAttribute('hidden')).toBe(true)
   })
 })

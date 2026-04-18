@@ -84,7 +84,7 @@ export const CommandItem = ({
     // biome-ignore lint/a11y/useFocusableInteractive: items are navigated via the input, not directly focused
     <div
       ref={ref}
-      cmdk-item=""
+      command-palette-item=""
       id={id}
       role="option"
       aria-selected={isSelected}

@@ -6,12 +6,12 @@ import { CommandItem } from '../src/item'
 import { commandSlots, itemNode } from './helpers'
 
 describe('<CommandItem>', () => {
-  it('renders with cmdk-item attribute', () => {
+  it('renders with command-palette-item attribute', () => {
     render(Command, {
       slots: commandSlots([itemNode('apple', 'Apple')]),
     })
 
-    expect(screen.getByText('Apple').closest('[cmdk-item]')).toBeInTheDocument()
+    expect(screen.getByText('Apple').closest('[command-palette-item]')).toBeInTheDocument()
   })
 
   it('emits select when clicked', () => {
@@ -44,12 +44,12 @@ describe('<CommandItem>', () => {
       slots: commandSlots([itemNode('apple', 'Apple'), itemNode('banana', 'Banana')]),
     })
 
-    expect(screen.getByText('Apple').closest('[cmdk-item]')?.getAttribute('data-selected')).toBe(
-      'true',
-    )
-    expect(screen.getByText('Banana').closest('[cmdk-item]')?.getAttribute('data-selected')).toBe(
-      null,
-    )
+    expect(
+      screen.getByText('Apple').closest('[command-palette-item]')?.getAttribute('data-selected'),
+    ).toBe('true')
+    expect(
+      screen.getByText('Banana').closest('[command-palette-item]')?.getAttribute('data-selected'),
+    ).toBe(null)
   })
 
   it('sets data-disabled on disabled items', () => {
@@ -57,9 +57,9 @@ describe('<CommandItem>', () => {
       slots: commandSlots([itemNode('apple', 'Apple', { disabled: true })]),
     })
 
-    expect(screen.getByText('Apple').closest('[cmdk-item]')?.getAttribute('data-disabled')).toBe(
-      'true',
-    )
+    expect(
+      screen.getByText('Apple').closest('[command-palette-item]')?.getAttribute('data-disabled'),
+    ).toBe('true')
   })
 
   it('hides item when filtered out', () => {
@@ -68,7 +68,7 @@ describe('<CommandItem>', () => {
       slots: commandSlots([itemNode('apple', 'Apple')]),
     })
 
-    expect(container.querySelector('[cmdk-item]')).not.toBeInTheDocument()
+    expect(container.querySelector('[command-palette-item]')).not.toBeInTheDocument()
   })
 
   it('renders item with empty-string value', () => {
@@ -76,7 +76,7 @@ describe('<CommandItem>', () => {
       slots: commandSlots([itemNode('', 'All')]),
     })
 
-    expect(screen.getByText('All').closest('[cmdk-item]')).toBeInTheDocument()
+    expect(screen.getByText('All').closest('[command-palette-item]')).toBeInTheDocument()
   })
 
   it('renders item with special chars in value without crashing', () => {
@@ -95,7 +95,9 @@ describe('<CommandItem>', () => {
     fireEvent.pointerMove(screen.getByText('B'))
     await nextTick()
 
-    expect(screen.getByText('B').closest('[cmdk-item]')?.getAttribute('data-selected')).toBe('true')
+    expect(
+      screen.getByText('B').closest('[command-palette-item]')?.getAttribute('data-selected'),
+    ).toBe('true')
   })
 
   it('selectOnHover=false does not update value on pointer move', () => {
@@ -106,8 +108,8 @@ describe('<CommandItem>', () => {
 
     fireEvent.pointerMove(screen.getByText('B'))
 
-    expect(screen.getByText('B').closest('[cmdk-item]')?.getAttribute('data-selected')).not.toBe(
-      'true',
-    )
+    expect(
+      screen.getByText('B').closest('[command-palette-item]')?.getAttribute('data-selected'),
+    ).not.toBe('true')
   })
 })

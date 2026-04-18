@@ -189,7 +189,7 @@ describe('<CommandDialog>', () => {
     expect(onOpenChange).not.toHaveBeenCalled()
   })
 
-  it('contains the Command with the cmdk-root attribute', () => {
+  it('contains the Command with the command-palette-root attribute', () => {
     render(CommandDialog, {
       props: { open: true, label: 'menu' },
       slots: {
@@ -197,7 +197,9 @@ describe('<CommandDialog>', () => {
       },
     })
 
-    expect(document.querySelector('dialog')?.querySelector('[cmdk-root]')).toBeInTheDocument()
+    expect(
+      document.querySelector('dialog')?.querySelector('[command-palette-root]'),
+    ).toBeInTheDocument()
   })
 
   it('renders children as Command content', () => {

@@ -10,7 +10,7 @@ export const CommandEmpty = ({ ref, children, ...rest }: CommandEmptyProps) => {
   const isEmpty = useCommandSlice((s) => s.filteredOrder.length === 0)
   if (!isEmpty) return null
   return (
-    <div ref={ref} cmdk-empty="" role="presentation" {...rest}>
+    <div ref={ref} command-palette-empty="" role="presentation" {...rest}>
       {children}
     </div>
   )

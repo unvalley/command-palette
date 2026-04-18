@@ -62,7 +62,7 @@ export const CommandInput = defineComponent({
         'input',
         mergeProps(
           {
-            'cmdk-input': '',
+            'command-palette-input': '',
             role: 'combobox',
             'aria-autocomplete': 'list',
             'aria-expanded': hasVisibleItems.value ? 'true' : 'false',

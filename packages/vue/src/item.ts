@@ -88,7 +88,7 @@ export const CommandItem = defineComponent({
         mergeProps(
           {
             id,
-            'cmdk-item': '',
+            'command-palette-item': '',
             role: 'option',
             'aria-selected': isSelected.value ? 'true' : 'false',
             'aria-disabled': props.disabled ? 'true' : undefined,

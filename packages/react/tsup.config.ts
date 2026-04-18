@@ -4,11 +4,11 @@ export default defineConfig({
   entry: ['src/index.ts'],
   format: ['esm'],
   dts: {
-    resolve: ['@unvalley/cmdk-core'],
+    resolve: ['@command-palette/core'],
   },
   clean: true,
   sourcemap: true,
   target: 'es2022',
   external: ['react', 'react-dom'],
-  noExternal: ['@unvalley/cmdk-core'],
+  noExternal: ['@command-palette/core'],
 })

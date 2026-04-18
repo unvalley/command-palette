@@ -1,4 +1,4 @@
-import { type CommandFilter, createCommand } from '@unvalley/cmdk-core'
+import { type CommandFilter, createCommand } from '@command-palette/core'
 import {
   defineComponent,
   h,
@@ -44,7 +44,7 @@ export const Command = defineComponent({
     onScopeDispose(unsubscribe)
     provide(CommandStoreKey, store)
     provide(CommandVersionKey, version)
-    provide(CommandIdAllocatorKey, (prefix: string) => `cmdk-vue-${prefix}-${++nextId}`)
+    provide(CommandIdAllocatorKey, (prefix: string) => `command-palette-vue-${prefix}-${++nextId}`)
 
     onMounted(() => {
       if (props.modelValue !== undefined) {
@@ -117,7 +117,7 @@ export const Command = defineComponent({
         'div',
         mergeProps(
           {
-            'cmdk-root': '',
+            'command-palette-root': '',
             role: 'application',
             'aria-label': props.label,
             onKeydown: handleKeydown,

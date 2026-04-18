@@ -148,14 +148,14 @@ describe('<CommandDialog>', () => {
     expect(onOpenChange).not.toHaveBeenCalled()
   })
 
-  it('contains the Command with the cmdk-root attribute', () => {
+  it('contains the Command with the command-palette-root attribute', () => {
     render(
       <CommandDialog open={true} onOpenChange={() => {}} label="menu">
         <CommandInput placeholder="Search" />
       </CommandDialog>,
     )
     const dialog = document.querySelector('dialog')
-    expect(dialog?.querySelector('[cmdk-root]')).toBeInTheDocument()
+    expect(dialog?.querySelector('[command-palette-root]')).toBeInTheDocument()
   })
 
   it('renders children as Command content (input is usable)', async () => {

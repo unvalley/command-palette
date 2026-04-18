@@ -21,7 +21,7 @@ export const CommandSeparator = defineComponent({
         'div',
         mergeProps(
           {
-            'cmdk-separator': '',
+            'command-palette-separator': '',
             role: 'separator',
           },
           attrs,

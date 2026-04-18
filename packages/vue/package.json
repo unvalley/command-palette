@@ -7,7 +7,6 @@
   "keywords": [
     "command-menu",
     "command-palette",
-    "cmdk",
     "vue",
     "ui"
   ],
@@ -25,11 +24,11 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/unvalley/cmdk.git"
+    "url": "git+https://github.com/unvalley/command-palette.git"
   },
-  "homepage": "https://github.com/unvalley/cmdk/tree/main/packages/vue#readme",
+  "homepage": "https://github.com/unvalley/command-palette/tree/main/packages/vue#readme",
   "bugs": {
-    "url": "https://github.com/unvalley/cmdk/issues"
+    "url": "https://github.com/unvalley/command-palette/issues"
   },
   "scripts": {
     "build": "tsup",
@@ -44,7 +43,7 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/user-event": "^14.6.1",
     "@testing-library/vue": "^8.1.0",
-    "@unvalley/cmdk-core": "workspace:*",
+    "@command-palette/core": "workspace:*",
     "jsdom": "^29.0.2",
     "tsup": "^8.5.1",
     "typescript": "^6.0.3",

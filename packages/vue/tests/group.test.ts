@@ -23,7 +23,7 @@ describe('<CommandGroup> + <CommandItem>', () => {
 
     await nextTick()
 
-    const group = container.querySelector('[cmdk-group]')
+    const group = container.querySelector('[command-palette-group]')
     expect(group).toBeInTheDocument()
     expect(group?.hasAttribute('hidden')).toBe(false)
   })
@@ -42,7 +42,7 @@ describe('<CommandGroup> + <CommandItem>', () => {
       ]),
     })
 
-    expect(container.querySelector('[cmdk-group]')?.hasAttribute('hidden')).toBe(true)
+    expect(container.querySelector('[command-palette-group]')?.hasAttribute('hidden')).toBe(true)
   })
 
   it('keeps a forceMount group visible even with non-matching search', () => {
@@ -59,7 +59,7 @@ describe('<CommandGroup> + <CommandItem>', () => {
       ]),
     })
 
-    expect(container.querySelector('[cmdk-group]')?.hasAttribute('hidden')).toBe(false)
+    expect(container.querySelector('[command-palette-group]')?.hasAttribute('hidden')).toBe(false)
   })
 
   it('explicit groupId prop overrides inherited context', () => {
@@ -77,6 +77,6 @@ describe('<CommandGroup> + <CommandItem>', () => {
       ]),
     })
 
-    expect(container.querySelector('[cmdk-group]')?.hasAttribute('hidden')).toBe(true)
+    expect(container.querySelector('[command-palette-group]')?.hasAttribute('hidden')).toBe(true)
   })
 })

@@ -53,7 +53,7 @@ export const CommandInput = ({
   return (
     <input
       ref={ref}
-      cmdk-input=""
+      command-palette-input=""
       role="combobox"
       aria-autocomplete="list"
       aria-expanded={hasVisibleItems}

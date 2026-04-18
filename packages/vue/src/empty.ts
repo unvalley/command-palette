@@ -14,7 +14,7 @@ export const CommandEmpty = defineComponent({
         'div',
         mergeProps(
           {
-            'cmdk-empty': '',
+            'command-palette-empty': '',
             role: 'presentation',
           },
           attrs,

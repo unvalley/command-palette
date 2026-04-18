@@ -81,7 +81,7 @@ export const createCommand = (options: CommandStoreOptions = {}): CommandStore =
             : filter(item.value, search, item.keywords ?? [])
         } catch (err) {
           if (isDev) {
-            console.warn(`cmdk: filter threw for value "${item.value}":`, err)
+            console.warn(`command-palette: filter threw for value "${item.value}":`, err)
           }
           item.score = 0
         }
@@ -144,10 +144,12 @@ export const createCommand = (options: CommandStoreOptions = {}): CommandStore =
 
   const registerItem = (input: ItemInput): (() => void) => {
     if (typeof input.value !== 'string') {
-      throw new TypeError(`cmdk: item value must be a string, got ${typeof input.value}`)
+      throw new TypeError(`command-palette: item value must be a string, got ${typeof input.value}`)
     }
     if (isDev && items.has(input.value)) {
-      console.warn(`cmdk: duplicate item value "${input.value}". Last registration wins.`)
+      console.warn(
+        `command-palette: duplicate item value "${input.value}". Last registration wins.`,
+      )
     }
     const data: ItemData = {
       ...input,
@@ -170,10 +172,10 @@ export const createCommand = (options: CommandStoreOptions = {}): CommandStore =
 
   const registerGroup = (input: GroupInput): (() => void) => {
     if (typeof input.id !== 'string') {
-      throw new TypeError('cmdk: group id must be a string')
+      throw new TypeError('command-palette: group id must be a string')
     }
     if (isDev && groups.has(input.id)) {
-      console.warn(`cmdk: duplicate group id "${input.id}". Last registration wins.`)
+      console.warn(`command-palette: duplicate group id "${input.id}". Last registration wins.`)
     }
     const data: GroupData = { ...input, order: nextOrder++ }
     groups.set(input.id, data)

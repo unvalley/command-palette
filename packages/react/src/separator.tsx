@@ -10,5 +10,5 @@ export const CommandSeparator = ({ ref, alwaysRender, ...rest }: CommandSeparato
   const search = useCommandSlice((s) => s.search)
   if (!alwaysRender && search !== '') return null
   // biome-ignore lint/a11y/useFocusableInteractive: separator is a visual divider, not interactive
-  return <div ref={ref} cmdk-separator="" role="separator" {...rest} />
+  return <div ref={ref} command-palette-separator="" role="separator" {...rest} />
 }

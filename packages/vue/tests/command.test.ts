@@ -3,7 +3,7 @@ import { fireEvent, render, screen } from '@testing-library/vue'
 import { describe, expect, it, vi } from 'vitest'
 import { defineComponent, h, nextTick, ref } from 'vue'
 import { useCommandSlice } from '../src/context'
-import * as cmdk from '../src/index'
+import * as commandPalette from '../src/index'
 import {
   Command,
   CommandInput,
@@ -22,12 +22,12 @@ describe('<Command>', () => {
     expect(screen.getByText('hello')).toBeInTheDocument()
   })
 
-  it('renders with cmdk-root data attribute', () => {
+  it('renders with command-palette-root data attribute', () => {
     const { container } = render(Command, {
       props: { label: 'test' },
     })
 
-    expect(container.querySelector('[cmdk-root]')).toBeInTheDocument()
+    expect(container.querySelector('[command-palette-root]')).toBeInTheDocument()
   })
 
   it('forwards label as aria-label', () => {
@@ -35,7 +35,9 @@ describe('<Command>', () => {
       props: { label: 'My Menu' },
     })
 
-    expect(container.querySelector('[cmdk-root]')?.getAttribute('aria-label')).toBe('My Menu')
+    expect(container.querySelector('[command-palette-root]')?.getAttribute('aria-label')).toBe(
+      'My Menu',
+    )
   })
 
   it('updates filter after rerender', async () => {
@@ -216,9 +218,9 @@ describe('<CommandInput>', () => {
       ]),
     })
 
-    expect(screen.getByText('Apple').closest('[cmdk-item]')?.getAttribute('data-selected')).toBe(
-      'true',
-    )
+    expect(
+      screen.getByText('Apple').closest('[command-palette-item]')?.getAttribute('data-selected'),
+    ).toBe('true')
   })
 
   it('prefers modelValue over defaultValue', async () => {
@@ -237,9 +239,9 @@ describe('<CommandInput>', () => {
 
     await nextTick()
 
-    expect(screen.getByText('Banana').closest('[cmdk-item]')?.getAttribute('data-selected')).toBe(
-      'true',
-    )
+    expect(
+      screen.getByText('Banana').closest('[command-palette-item]')?.getAttribute('data-selected'),
+    ).toBe('true')
   })
 })
 
@@ -263,15 +265,15 @@ describe('useCommandSlice', () => {
 
 describe('public exports', () => {
   it('exposes all components as named exports', () => {
-    expect(cmdk.Command).toBeDefined()
-    expect(cmdk.CommandInput).toBeDefined()
-    expect(cmdk.CommandList).toBeDefined()
-    expect(cmdk.CommandItem).toBeDefined()
-    expect(cmdk.CommandGroup).toBeDefined()
-    expect(cmdk.CommandEmpty).toBeDefined()
-    expect(cmdk.CommandLoading).toBeDefined()
-    expect(cmdk.CommandSeparator).toBeDefined()
-    expect(cmdk.useCommandStore).toBeDefined()
-    expect(cmdk.useCommandSlice).toBeDefined()
+    expect(commandPalette.Command).toBeDefined()
+    expect(commandPalette.CommandInput).toBeDefined()
+    expect(commandPalette.CommandList).toBeDefined()
+    expect(commandPalette.CommandItem).toBeDefined()
+    expect(commandPalette.CommandGroup).toBeDefined()
+    expect(commandPalette.CommandEmpty).toBeDefined()
+    expect(commandPalette.CommandLoading).toBeDefined()
+    expect(commandPalette.CommandSeparator).toBeDefined()
+    expect(commandPalette.useCommandStore).toBeDefined()
+    expect(commandPalette.useCommandSlice).toBeDefined()
   })
 })

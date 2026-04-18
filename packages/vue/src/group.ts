@@ -39,7 +39,7 @@ export const CommandGroup = defineComponent({
         'div',
         mergeProps(
           {
-            'cmdk-group': '',
+            'command-palette-group': '',
             role: 'presentation',
             hidden: !isVisible.value || undefined,
             'data-group-id': id,
@@ -52,7 +52,7 @@ export const CommandGroup = defineComponent({
                 'div',
                 {
                   id,
-                  'cmdk-group-heading': '',
+                  'command-palette-group-heading': '',
                 },
                 headingContent,
               )
@@ -60,7 +60,7 @@ export const CommandGroup = defineComponent({
           h(
             'div',
             {
-              'cmdk-group-items': '',
+              'command-palette-group-items': '',
               role: 'group',
               'aria-labelledby': headingContent != null ? id : undefined,
             },

@@ -9,7 +9,7 @@ export const CommandList = defineComponent({
         'div',
         mergeProps(
           {
-            'cmdk-list': '',
+            'command-palette-list': '',
             role: 'listbox',
           },
           attrs,

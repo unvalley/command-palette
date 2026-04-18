@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// biome-ignore lint/correctness/noUnusedImports: components are referenced from the Vue template
 import {
   CommandDialog,
   CommandEmpty,
@@ -17,10 +18,12 @@ type Action = {
   keywords?: readonly string[]
 }
 
+// biome-ignore lint/correctness/noUnusedVariables: referenced from the Vue template
 const frameworkLabel = '@command-palette/vue'
 const open = ref(false)
 const log = ref<string[]>([])
 
+// biome-ignore lint/correctness/noUnusedVariables: referenced from the Vue template
 const navigation: readonly Action[] = [
   { value: 'go-home', label: 'Go to Home', hint: 'G H' },
   { value: 'go-projects', label: 'Go to Projects', hint: 'G P' },
@@ -28,6 +31,7 @@ const navigation: readonly Action[] = [
   { value: 'go-settings', label: 'Go to Settings', hint: 'G S', keywords: ['prefs'] },
 ]
 
+// biome-ignore lint/correctness/noUnusedVariables: referenced from the Vue template
 const actions: readonly Action[] = [
   { value: 'new-file', label: 'New file', hint: '⌘N', keywords: ['create'] },
   { value: 'save', label: 'Save', hint: '⌘S' },
@@ -35,6 +39,7 @@ const actions: readonly Action[] = [
   { value: 'delete', label: 'Delete', keywords: ['remove', 'trash'] },
 ]
 
+// biome-ignore lint/correctness/noUnusedVariables: referenced from the Vue template
 const account: readonly Action[] = [
   { value: 'profile', label: 'View profile', keywords: ['me', 'account'] },
   { value: 'sign-out', label: 'Sign out', keywords: ['logout', 'exit'] },
@@ -55,6 +60,7 @@ onBeforeUnmount(() => {
   document.removeEventListener('keydown', onKeydown)
 })
 
+// biome-ignore lint/correctness/noUnusedVariables: referenced from the Vue template
 const run = (value: string): void => {
   log.value = [`Ran: ${value} (${new Date().toLocaleTimeString()})`, ...log.value].slice(0, 8)
   open.value = false
@@ -64,7 +70,7 @@ const run = (value: string): void => {
 <template>
   <div class="page">
     <header>
-      <h1>cmdk demo</h1>
+      <h1>command-palette demo</h1>
       <p>
         Framework-agnostic command menu —
         <code>{{ frameworkLabel }}</code>

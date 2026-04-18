@@ -16,7 +16,7 @@ export const CommandLoading = defineComponent({
         'div',
         mergeProps(
           {
-            'cmdk-loading': '',
+            'command-palette-loading': '',
             role: 'progressbar',
             'aria-valuenow':
               props.progress != null ? Math.round(props.progress * 100).toString() : undefined,

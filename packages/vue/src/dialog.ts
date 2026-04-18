@@ -1,4 +1,4 @@
-import type { CommandFilter } from '@unvalley/cmdk-core'
+import type { CommandFilter } from '@command-palette/core'
 import {
   computed,
   defineComponent,
@@ -110,7 +110,7 @@ export const CommandDialog = defineComponent({
         mergeProps(
           {
             ref: dialogRef,
-            'cmdk-dialog': '',
+            'command-palette-dialog': '',
             class: props.dialogClass,
             onClick: handleClick,
             onKeydown: handleKeydown,
