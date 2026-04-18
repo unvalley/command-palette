@@ -13,10 +13,201 @@ import type {
 } from "./types"
 
 const isDev = process.env.NODE_ENV !== "production"
-const DEFAULT_FILTER: Exclude<CommandFilter, FilterFn> = "fuzzy"
+type BuiltInFilter = Exclude<CommandFilter, FilterFn>
+type ScoringBuiltInFilter = Exclude<BuiltInFilter, "none">
+type PreparedScoreHaystack = ReturnType<typeof prepareCommandScoreHaystack>
+
+type DerivedCollections = {
+  filteredOrder: string[]
+  visibleSet: Set<string>
+  navigableOrder: string[]
+  navigableIndex: Map<string, number>
+  visibleGroups: Set<string>
+}
+
+type UpdateItemResult = {
+  changed: boolean
+  invalidatePreparedScoreHaystack: boolean
+  next: ItemData
+}
+
+const DEFAULT_FILTER: BuiltInFilter = "fuzzy"
 
 const isBuiltInFilter = (filter: CommandFilter): filter is Exclude<CommandFilter, FilterFn> =>
   typeof filter === "string"
+
+const deriveCollections = ({
+  items,
+  groups,
+  filter,
+  search,
+  getPreparedScoreHaystack,
+  onFilterError,
+}: {
+  items: ReadonlyMap<string, ItemData>
+  groups: ReadonlyMap<string, GroupData>
+  filter: CommandFilter
+  search: string
+  getPreparedScoreHaystack: (item: ItemData) => PreparedScoreHaystack
+  onFilterError?: (item: ItemData, error: unknown) => void
+}): DerivedCollections => {
+  const filteredOrder: string[] = []
+  const visibleSet = new Set<string>()
+  const navigableOrder: string[] = []
+  const navigableIndex = new Map<string, number>()
+  const visibleGroups = new Set<string>()
+
+  const includeItem = (item: ItemData): void => {
+    filteredOrder.push(item.value)
+    visibleSet.add(item.value)
+    if (item.groupId) visibleGroups.add(item.groupId)
+    if (!item.disabled) {
+      navigableIndex.set(item.value, navigableOrder.length)
+      navigableOrder.push(item.value)
+    }
+  }
+
+  if (filter === "none" || search === "") {
+    for (const item of items.values()) {
+      item.score = 1
+      includeItem(item)
+    }
+  } else {
+    const normalizedSearch = isBuiltInFilter(filter) ? normalize(search) : ""
+    const visibleItems: ItemData[] = []
+
+    for (const item of items.values()) {
+      item.score = scoreItem({
+        item,
+        filter,
+        search,
+        normalizedSearch,
+        getPreparedScoreHaystack,
+        onFilterError,
+      })
+
+      if (item.score > 0 || item.forceMount) {
+        visibleItems.push(item)
+      }
+    }
+
+    visibleItems.sort(compareByScore)
+
+    for (const item of visibleItems) {
+      includeItem(item)
+    }
+  }
+
+  for (const group of groups.values()) {
+    if (group.forceMount) visibleGroups.add(group.id)
+  }
+
+  return {
+    filteredOrder,
+    visibleSet,
+    navigableOrder,
+    navigableIndex,
+    visibleGroups,
+  }
+}
+
+const scoreItem = ({
+  item,
+  filter,
+  search,
+  normalizedSearch,
+  getPreparedScoreHaystack,
+  onFilterError,
+}: {
+  item: ItemData
+  filter: ScoringBuiltInFilter | FilterFn
+  search: string
+  normalizedSearch: string
+  getPreparedScoreHaystack: (item: ItemData) => PreparedScoreHaystack
+  onFilterError?: (item: ItemData, error: unknown) => void
+}): number => {
+  try {
+    return isBuiltInFilter(filter)
+      ? commandBuiltInScorePrepared(
+          getPreparedScoreHaystack(item),
+          search,
+          normalizedSearch,
+          filter,
+        )
+      : filter(item.value, search, item.keywords ?? [])
+  } catch (error) {
+    onFilterError?.(item, error)
+    return 0
+  }
+}
+
+const compareByScore = (a: ItemData, b: ItemData): number => {
+  if (b.score !== a.score) return b.score - a.score
+  return a.order - b.order
+}
+
+const getBoundaryValue = (
+  navigableOrder: readonly string[],
+  boundary: "first" | "last",
+): string | undefined => {
+  return boundary === "first" ? navigableOrder[0] : navigableOrder[navigableOrder.length - 1]
+}
+
+const getAdjacentValue = (
+  navigableOrder: readonly string[],
+  currentIndex: number,
+  direction: "next" | "prev",
+  loop: boolean,
+): string | undefined => {
+  if (navigableOrder.length === 0) return undefined
+  if (currentIndex === -1) {
+    return getBoundaryValue(navigableOrder, direction === "next" ? "first" : "last")
+  }
+
+  const nextIndex = currentIndex + (direction === "next" ? 1 : -1)
+  const nextValue = navigableOrder[nextIndex]
+  if (nextValue !== undefined) return nextValue
+  if (!loop) return undefined
+
+  return getBoundaryValue(navigableOrder, direction === "next" ? "first" : "last")
+}
+
+const updateItemData = (
+  existing: ItemData,
+  patch: Partial<Omit<ItemInput, "value">>,
+): UpdateItemResult => {
+  let changed = false
+  let invalidatePreparedScoreHaystack = false
+  const next = { ...existing }
+
+  if ("keywords" in patch && !Object.is(existing.keywords, patch.keywords)) {
+    next.keywords = patch.keywords
+    changed = true
+    invalidatePreparedScoreHaystack = true
+  }
+  if ("groupId" in patch && !Object.is(existing.groupId, patch.groupId)) {
+    next.groupId = patch.groupId
+    changed = true
+  }
+  if ("disabled" in patch && !Object.is(existing.disabled, patch.disabled)) {
+    next.disabled = patch.disabled
+    changed = true
+  }
+  if ("forceMount" in patch && !Object.is(existing.forceMount, patch.forceMount)) {
+    next.forceMount = patch.forceMount
+    changed = true
+  }
+  if ("onSelect" in patch && !Object.is(existing.onSelect, patch.onSelect)) {
+    next.onSelect = patch.onSelect
+    changed = true
+  }
+
+  return {
+    changed,
+    invalidatePreparedScoreHaystack,
+    next,
+  }
+}
 
 export const createCommand = (options: CommandStoreOptions = {}): CommandStore => {
   let filter = options.filter ?? DEFAULT_FILTER
@@ -33,13 +224,13 @@ export const createCommand = (options: CommandStoreOptions = {}): CommandStore =
   let hasBeenSelected = value !== "" // true if controlled with non-empty initial
   let isComposing = false
   let filteredOrder: string[] = []
-  let visibleSet: Set<string> = new Set()
+  let visibleSet = new Set<string>()
   let navigableOrder: string[] = []
-  let navigableIndex: Map<string, number> = new Map()
-  let visibleGroups: Set<string> = new Set()
+  let navigableIndex = new Map<string, number>()
+  let visibleGroups = new Set<string>()
   let initialized = false
 
-  const preparedScoreHaystacks = new Map<string, ReturnType<typeof prepareCommandScoreHaystack>>()
+  const preparedScoreHaystacks = new Map<string, PreparedScoreHaystack>()
 
   const listeners = new Set<() => void>()
 
@@ -48,72 +239,24 @@ export const createCommand = (options: CommandStoreOptions = {}): CommandStore =
   }
 
   const recompute = (): void => {
-    const nextFilteredOrder: string[] = []
-    const nextVisibleSet: Set<string> = new Set()
-    const nextNavigableOrder: string[] = []
-    const nextNavigableIndex: Map<string, number> = new Map()
-    const nextVisibleGroups: Set<string> = new Set()
-
-    if (filter === "none" || search === "") {
-      for (const item of items.values()) {
-        item.score = 1
-        nextFilteredOrder.push(item.value)
-        nextVisibleSet.add(item.value)
-        if (item.groupId) nextVisibleGroups.add(item.groupId)
-        if (!item.disabled) {
-          nextNavigableIndex.set(item.value, nextNavigableOrder.length)
-          nextNavigableOrder.push(item.value)
+    const nextCollections = deriveCollections({
+      items,
+      groups,
+      filter,
+      search,
+      getPreparedScoreHaystack,
+      onFilterError: (item, error) => {
+        if (isDev) {
+          console.warn(`command-palette: filter threw for value "${item.value}":`, error)
         }
-      }
-    } else {
-      const normalizedSearch = isBuiltInFilter(filter) ? normalize(search) : ""
-      const visible: ItemData[] = []
+      },
+    })
 
-      for (const item of items.values()) {
-        try {
-          item.score = isBuiltInFilter(filter)
-            ? commandBuiltInScorePrepared(
-                getPreparedScoreHaystack(item),
-                search,
-                normalizedSearch,
-                filter,
-              )
-            : filter(item.value, search, item.keywords ?? [])
-        } catch (err) {
-          if (isDev) {
-            console.warn(`command-palette: filter threw for value "${item.value}":`, err)
-          }
-          item.score = 0
-        }
-
-        if (item.forceMount || item.score > 0) visible.push(item)
-      }
-
-      visible.sort((a, b) => {
-        if (b.score !== a.score) return b.score - a.score
-        return a.order - b.order
-      })
-
-      for (const item of visible) {
-        nextFilteredOrder.push(item.value)
-        nextVisibleSet.add(item.value)
-        if (item.groupId) nextVisibleGroups.add(item.groupId)
-        if (!item.disabled) {
-          nextNavigableIndex.set(item.value, nextNavigableOrder.length)
-          nextNavigableOrder.push(item.value)
-        }
-      }
-    }
-
-    for (const g of groups.values()) {
-      if (g.forceMount) nextVisibleGroups.add(g.id)
-    }
-
-    filteredOrder = nextFilteredOrder
-    visibleSet = nextVisibleSet
-    navigableOrder = nextNavigableOrder
-    navigableIndex = nextNavigableIndex
-    visibleGroups = nextVisibleGroups
+    filteredOrder = nextCollections.filteredOrder
+    visibleSet = nextCollections.visibleSet
+    navigableOrder = nextCollections.navigableOrder
+    navigableIndex = nextCollections.navigableIndex
+    visibleGroups = nextCollections.visibleGroups
 
     // Auto-correct selection if the previously-selected value is no longer navigable.
     // Skip during initial recompute (respect options.initialValue).
@@ -193,34 +336,15 @@ export const createCommand = (options: CommandStoreOptions = {}): CommandStore =
   const updateItem = (itemValue: string, patch: Partial<Omit<ItemInput, "value">>): void => {
     const existing = items.get(itemValue)
     if (!existing) return
-    let changed = false
-    const next = { ...existing }
 
-    if ("keywords" in patch && !Object.is(existing.keywords, patch.keywords)) {
-      next.keywords = patch.keywords
+    const nextItem = updateItemData(existing, patch)
+    if (!nextItem.changed) return
+
+    if (nextItem.invalidatePreparedScoreHaystack) {
       preparedScoreHaystacks.delete(itemValue)
-      changed = true
-    }
-    if ("groupId" in patch && !Object.is(existing.groupId, patch.groupId)) {
-      next.groupId = patch.groupId
-      changed = true
-    }
-    if ("disabled" in patch && !Object.is(existing.disabled, patch.disabled)) {
-      next.disabled = patch.disabled
-      changed = true
-    }
-    if ("forceMount" in patch && !Object.is(existing.forceMount, patch.forceMount)) {
-      next.forceMount = patch.forceMount
-      changed = true
-    }
-    if ("onSelect" in patch && !Object.is(existing.onSelect, patch.onSelect)) {
-      next.onSelect = patch.onSelect
-      changed = true
     }
 
-    if (!changed) return
-
-    items.set(itemValue, next)
+    items.set(itemValue, nextItem.next)
     recompute()
     notify()
   }
@@ -299,52 +423,24 @@ export const createCommand = (options: CommandStoreOptions = {}): CommandStore =
   const currentIndex = (): number => navigableIndex.get(value) ?? -1
 
   const selectFirst = (): void => {
-    const first = navigableOrder[0]
+    const first = getBoundaryValue(navigableOrder, "first")
     if (first === undefined) return
     setValue(first)
   }
 
   const selectLast = (): void => {
-    const last = navigableOrder[navigableOrder.length - 1]
+    const last = getBoundaryValue(navigableOrder, "last")
     if (last === undefined) return
     setValue(last)
   }
 
   const selectNext = (): void => {
-    if (navigableOrder.length === 0) return
-    const idx = currentIndex()
-    if (idx === -1) {
-      selectFirst()
-      return
-    }
-    const nextIdx = idx + 1
-    if (nextIdx >= navigableOrder.length) {
-      if (loop) {
-        const first = navigableOrder[0]
-        if (first !== undefined) setValue(first)
-      }
-      return
-    }
-    const next = navigableOrder[nextIdx]
+    const next = getAdjacentValue(navigableOrder, currentIndex(), "next", loop)
     if (next !== undefined) setValue(next)
   }
 
   const selectPrev = (): void => {
-    if (navigableOrder.length === 0) return
-    const idx = currentIndex()
-    if (idx === -1) {
-      selectLast()
-      return
-    }
-    const prevIdx = idx - 1
-    if (prevIdx < 0) {
-      if (loop) {
-        const last = navigableOrder[navigableOrder.length - 1]
-        if (last !== undefined) setValue(last)
-      }
-      return
-    }
-    const prev = navigableOrder[prevIdx]
+    const prev = getAdjacentValue(navigableOrder, currentIndex(), "prev", loop)
     if (prev !== undefined) setValue(prev)
   }
 
@@ -361,9 +457,7 @@ export const createCommand = (options: CommandStoreOptions = {}): CommandStore =
     item.onSelect?.(value, event)
   }
 
-  const getPreparedScoreHaystack = (
-    item: ItemData,
-  ): ReturnType<typeof prepareCommandScoreHaystack> => {
+  const getPreparedScoreHaystack = (item: ItemData): PreparedScoreHaystack => {
     const cached = preparedScoreHaystacks.get(item.value)
     if (cached) return cached
 
