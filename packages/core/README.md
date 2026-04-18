@@ -50,8 +50,8 @@ Main methods:
 - `selectNext()` / `selectPrev()` / `selectFirst()` / `selectLast()`
 - `triggerSelect(event?)`
 - `getState()`
-- `subscribe(listener)`
-- `subscribeSlice(selector, listener, isEqual?)`
+- `getInitialState()`
+- `subscribe(listener)` or `subscribe(selector, listener, options?)`
 
 `updateOptions()` updates `filter`, `loop`, `selectOnHover`, and callbacks after creation.
 

@@ -74,6 +74,15 @@ export type CommandState = {
   selectOnHover: boolean
 }
 
+export type CommandStoreListener = (state: CommandState, prevState: CommandState) => void
+
+export type CommandSliceSubscribeOptions<T> = {
+  /** Custom equality function used to detect slice changes. Defaults to `Object.is`. */
+  equalityFn?: (a: T, b: T) => boolean
+  /** Invoke the listener immediately with the current slice. */
+  fireImmediately?: boolean
+}
+
 export type CommandStore = {
   // Item / group registration
   registerItem: (item: ItemInput) => () => void
@@ -102,15 +111,13 @@ export type CommandStore = {
 
   // State access
   getState: () => CommandState
-  subscribe: (listener: () => void) => () => void
-  /**
-   * Subscribe to a slice of state. The listener is called with the initial slice
-   * value and again whenever the computed slice changes (per `isEqual`, which
-   * defaults to Object.is). Returns an unsubscribe function.
-   */
-  subscribeSlice: <T>(
-    selector: (state: CommandState) => T,
-    listener: (slice: T) => void,
-    isEqual?: (a: T, b: T) => boolean,
-  ) => () => void
+  getInitialState: () => CommandState
+  subscribe: {
+    (listener: CommandStoreListener): () => void
+    <T>(
+      selector: (state: CommandState) => T,
+      listener: (slice: T, prevSlice: T) => void,
+      options?: CommandSliceSubscribeOptions<T>,
+    ): () => void
+  }
 }

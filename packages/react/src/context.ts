@@ -29,7 +29,7 @@ export const useCommandStore = (): CommandStore => {
 export const useCommandSlice = <T>(selector: (state: CommandState) => T): T => {
   const store = useCommandStore()
   const subscribe = useCallback(
-    (onStoreChange: () => void) => store.subscribeSlice(selector, () => onStoreChange()),
+    (onStoreChange: () => void) => store.subscribe(selector, () => onStoreChange()),
     [store, selector],
   )
   const getSnapshot = useCallback(() => selector(store.getState()), [store, selector])

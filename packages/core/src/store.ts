@@ -2,8 +2,10 @@ import { normalize } from "./normalize"
 import { commandBuiltInScorePrepared, prepareCommandScoreHaystack } from "./score"
 import type {
   CommandFilter,
+  CommandSliceSubscribeOptions,
   CommandState,
   CommandStore,
+  CommandStoreListener,
   CommandStoreOptions,
   FilterFn,
   GroupData,
@@ -18,6 +20,7 @@ type ScoringBuiltInFilter = Exclude<BuiltInFilter, "none">
 type PreparedScoreHaystack = ReturnType<typeof prepareCommandScoreHaystack>
 
 type DerivedCollections = {
+  items: Map<string, ItemData>
   filteredOrder: string[]
   visibleSet: Set<string>
   navigableOrder: string[]
@@ -51,6 +54,7 @@ const deriveCollections = ({
   getPreparedScoreHaystack: (item: ItemData) => PreparedScoreHaystack
   onFilterError?: (item: ItemData, error: unknown) => void
 }): DerivedCollections => {
+  const nextItems = new Map<string, ItemData>()
   const filteredOrder: string[] = []
   const visibleSet = new Set<string>()
   const navigableOrder: string[] = []
@@ -69,15 +73,16 @@ const deriveCollections = ({
 
   if (filter === "none" || search === "") {
     for (const item of items.values()) {
-      item.score = 1
-      includeItem(item)
+      const nextItem = item.score === 1 ? item : { ...item, score: 1 }
+      nextItems.set(nextItem.value, nextItem)
+      includeItem(nextItem)
     }
   } else {
     const normalizedSearch = isBuiltInFilter(filter) ? normalize(search) : ""
     const visibleItems: ItemData[] = []
 
     for (const item of items.values()) {
-      item.score = scoreItem({
+      const nextScore = scoreItem({
         item,
         filter,
         search,
@@ -85,9 +90,11 @@ const deriveCollections = ({
         getPreparedScoreHaystack,
         onFilterError,
       })
+      const nextItem = item.score === nextScore ? item : { ...item, score: nextScore }
+      nextItems.set(nextItem.value, nextItem)
 
-      if (item.score > 0 || item.forceMount) {
-        visibleItems.push(item)
+      if (nextItem.score > 0 || nextItem.forceMount) {
+        visibleItems.push(nextItem)
       }
     }
 
@@ -103,6 +110,7 @@ const deriveCollections = ({
   }
 
   return {
+    items: nextItems,
     filteredOrder,
     visibleSet,
     navigableOrder,
@@ -209,6 +217,47 @@ const updateItemData = (
   }
 }
 
+const parseSliceSubscribeOptions = <T>(
+  options: CommandSliceSubscribeOptions<T> = {},
+): Required<CommandSliceSubscribeOptions<T>> => {
+  return {
+    equalityFn: options.equalityFn ?? Object.is,
+    fireImmediately: options.fireImmediately ?? false,
+  }
+}
+
+const withMapEntry = <K, V>(map: ReadonlyMap<K, V>, key: K, value: V): Map<K, V> => {
+  const next = new Map(map)
+  next.set(key, value)
+  return next
+}
+
+const withoutMapEntry = <K, V>(map: ReadonlyMap<K, V>, key: K): Map<K, V> => {
+  const next = new Map(map)
+  next.delete(key)
+  return next
+}
+
+const resolveSelectedValue = ({
+  value,
+  navigableIndex,
+  navigableOrder,
+  initialized,
+  hasBeenSelected,
+}: {
+  value: string
+  navigableIndex: ReadonlyMap<string, number>
+  navigableOrder: readonly string[]
+  initialized: boolean
+  hasBeenSelected: boolean
+}): string => {
+  if (!initialized || !hasBeenSelected || navigableIndex.has(value)) {
+    return value
+  }
+
+  return navigableOrder[0] ?? ""
+}
+
 export const createCommand = (options: CommandStoreOptions = {}): CommandStore => {
   let filter = options.filter ?? DEFAULT_FILTER
   let loop = options.loop ?? false
@@ -217,33 +266,37 @@ export const createCommand = (options: CommandStoreOptions = {}): CommandStore =
   let onSearchChange = options.onSearchChange
 
   let nextOrder = 0
-  const items = new Map<string, ItemData>()
-  const groups = new Map<string, GroupData>()
-  let search = options.initialSearch ?? ""
-  let value = options.initialValue ?? ""
-  let hasBeenSelected = value !== "" // true if controlled with non-empty initial
-  let isComposing = false
-  let filteredOrder: string[] = []
-  let visibleSet = new Set<string>()
-  let navigableOrder: string[] = []
+  let state: CommandState = {
+    search: options.initialSearch ?? "",
+    value: options.initialValue ?? "",
+    items: new Map(),
+    groups: new Map(),
+    filteredOrder: [],
+    visibleSet: new Set(),
+    navigableOrder: [],
+    visibleGroups: new Set(),
+    isComposing: false,
+    selectOnHover,
+  }
   let navigableIndex = new Map<string, number>()
-  let visibleGroups = new Set<string>()
   let initialized = false
+  let initialState: CommandState
+  let hasBeenSelected = state.value !== "" // true if controlled with non-empty initial
 
   const preparedScoreHaystacks = new Map<string, PreparedScoreHaystack>()
 
-  const listeners = new Set<() => void>()
+  const listeners = new Set<CommandStoreListener>()
 
-  const notify = (): void => {
-    for (const l of listeners) l()
+  const notify = (nextState: CommandState, prevState: CommandState): void => {
+    for (const listener of listeners) listener(nextState, prevState)
   }
 
-  const recompute = (): void => {
-    const nextCollections = deriveCollections({
-      items,
-      groups,
+  const deriveState = (baseState: CommandState): DerivedCollections =>
+    deriveCollections({
+      items: baseState.items,
+      groups: baseState.groups,
       filter,
-      search,
+      search: baseState.search,
       getPreparedScoreHaystack,
       onFilterError: (item, error) => {
         if (isDev) {
@@ -252,44 +305,110 @@ export const createCommand = (options: CommandStoreOptions = {}): CommandStore =
       },
     })
 
-    filteredOrder = nextCollections.filteredOrder
-    visibleSet = nextCollections.visibleSet
-    navigableOrder = nextCollections.navigableOrder
-    navigableIndex = nextCollections.navigableIndex
-    visibleGroups = nextCollections.visibleGroups
+  const applyDerivedState = (
+    baseState: CommandState,
+    derivedState: DerivedCollections,
+  ): {
+    nextState: CommandState
+    nextNavigableIndex: Map<string, number>
+    valueChanged: boolean
+  } => {
+    const nextValue = resolveSelectedValue({
+      value: baseState.value,
+      navigableIndex: derivedState.navigableIndex,
+      navigableOrder: derivedState.navigableOrder,
+      initialized,
+      hasBeenSelected,
+    })
 
-    // Auto-correct selection if the previously-selected value is no longer navigable.
-    // Skip during initial recompute (respect options.initialValue).
-    // Skip if user has never made a selection (initial mount has no highlight).
-    if (initialized && hasBeenSelected && !navigableIndex.has(value)) {
-      const next = navigableOrder[0] ?? ""
-      if (next !== value) {
-        value = next
-        // Notify synchronously — the caller (e.g. setSearch, registerItem) will call
-        // notify() afterwards, so subscribers observe the corrected state.
-        onValueChange?.(value)
-      }
+    return {
+      nextState: {
+        ...baseState,
+        value: nextValue,
+        items: derivedState.items,
+        filteredOrder: derivedState.filteredOrder,
+        visibleSet: derivedState.visibleSet,
+        navigableOrder: derivedState.navigableOrder,
+        visibleGroups: derivedState.visibleGroups,
+      },
+      nextNavigableIndex: derivedState.navigableIndex,
+      valueChanged: nextValue !== baseState.value,
     }
   }
 
-  const getState = (): CommandState => ({
-    search,
-    value,
-    items,
-    groups,
-    filteredOrder,
-    visibleSet,
-    navigableOrder,
-    visibleGroups,
-    isComposing,
-    selectOnHover,
-  })
+  const deriveNextState = (
+    baseState: CommandState,
+  ): { nextState: CommandState; nextNavigableIndex: Map<string, number>; valueChanged: boolean } =>
+    applyDerivedState(baseState, deriveState(baseState))
+
+  const commit = ({
+    nextState,
+    nextNavigableIndex = navigableIndex,
+    notifySearchChange = false,
+    notifyValueChange = false,
+  }: {
+    nextState: CommandState
+    nextNavigableIndex?: Map<string, number>
+    notifySearchChange?: boolean
+    notifyValueChange?: boolean
+  }): void => {
+    const prevState = state
+    state = nextState
+    navigableIndex = nextNavigableIndex
+
+    if (notifyValueChange) {
+      onValueChange?.(state.value)
+    }
+    if (notifySearchChange) {
+      onSearchChange?.(state.search)
+    }
+
+    notify(state, prevState)
+  }
+
+  const getState = (): CommandState => state
+
+  const getInitialState = (): CommandState => initialState
+
+  const commitDerivedState = (baseState: CommandState): void => {
+    const { nextState, nextNavigableIndex, valueChanged } = deriveNextState(baseState)
+    commit({
+      nextState,
+      nextNavigableIndex,
+      notifyValueChange: valueChanged,
+    })
+  }
+
+  const commitItemChange = ({
+    nextItems,
+    invalidatePreparedScoreHaystackFor,
+  }: {
+    nextItems: Map<string, ItemData>
+    invalidatePreparedScoreHaystackFor?: string
+  }): void => {
+    if (invalidatePreparedScoreHaystackFor !== undefined) {
+      preparedScoreHaystacks.delete(invalidatePreparedScoreHaystackFor)
+    }
+
+    commitDerivedState({ ...state, items: nextItems })
+  }
+
+  const commitGroupChange = (nextGroups: Map<string, GroupData>): void => {
+    commitDerivedState({ ...state, groups: nextGroups })
+  }
+
+  const subscribeStore = (listener: CommandStoreListener): (() => void) => {
+    listeners.add(listener)
+    return () => {
+      listeners.delete(listener)
+    }
+  }
 
   const registerItem = (input: ItemInput): (() => void) => {
     if (typeof input.value !== "string") {
       throw new TypeError(`command-palette: item value must be a string, got ${typeof input.value}`)
     }
-    if (isDev && items.has(input.value)) {
+    if (isDev && state.items.has(input.value)) {
       console.warn(
         `command-palette: duplicate item value "${input.value}". Last registration wins.`,
       )
@@ -299,16 +418,16 @@ export const createCommand = (options: CommandStoreOptions = {}): CommandStore =
       order: nextOrder++,
       score: 0,
     }
-    preparedScoreHaystacks.delete(input.value)
-    items.set(input.value, data)
-    recompute()
-    notify()
+    commitItemChange({
+      nextItems: withMapEntry(state.items, input.value, data),
+      invalidatePreparedScoreHaystackFor: input.value,
+    })
     return () => {
-      if (items.get(input.value) === data) {
-        items.delete(input.value)
-        preparedScoreHaystacks.delete(input.value)
-        recompute()
-        notify()
+      if (state.items.get(input.value)?.order === data.order) {
+        commitItemChange({
+          nextItems: withoutMapEntry(state.items, input.value),
+          invalidatePreparedScoreHaystackFor: input.value,
+        })
       }
     }
   }
@@ -317,36 +436,33 @@ export const createCommand = (options: CommandStoreOptions = {}): CommandStore =
     if (typeof input.id !== "string") {
       throw new TypeError("command-palette: group id must be a string")
     }
-    if (isDev && groups.has(input.id)) {
+    if (isDev && state.groups.has(input.id)) {
       console.warn(`command-palette: duplicate group id "${input.id}". Last registration wins.`)
     }
     const data: GroupData = { ...input, order: nextOrder++ }
-    groups.set(input.id, data)
-    recompute()
-    notify()
+    commitGroupChange(withMapEntry(state.groups, input.id, data))
     return () => {
-      if (groups.get(input.id) === data) {
-        groups.delete(input.id)
-        recompute()
-        notify()
+      if (state.groups.get(input.id)?.order === data.order) {
+        commitGroupChange(withoutMapEntry(state.groups, input.id))
       }
     }
   }
 
   const updateItem = (itemValue: string, patch: Partial<Omit<ItemInput, "value">>): void => {
-    const existing = items.get(itemValue)
+    const existing = state.items.get(itemValue)
     if (!existing) return
 
     const nextItem = updateItemData(existing, patch)
     if (!nextItem.changed) return
 
     if (nextItem.invalidatePreparedScoreHaystack) {
-      preparedScoreHaystacks.delete(itemValue)
+      commitItemChange({
+        nextItems: withMapEntry(state.items, itemValue, nextItem.next),
+        invalidatePreparedScoreHaystackFor: itemValue,
+      })
+      return
     }
-
-    items.set(itemValue, nextItem.next)
-    recompute()
-    notify()
+    commitItemChange({ nextItems: withMapEntry(state.items, itemValue, nextItem.next) })
   }
 
   const updateOptions = (
@@ -375,86 +491,101 @@ export const createCommand = (options: CommandStoreOptions = {}): CommandStore =
 
     if (!needsNotify) return
 
+    const nextState = { ...state, selectOnHover: nextSelectOnHover }
+
     if (needsRecompute) {
-      recompute()
+      commitDerivedState(nextState)
+      return
     }
 
-    notify()
+    commit({ nextState })
   }
 
-  const subscribe = (listener: () => void): (() => void) => {
-    listeners.add(listener)
-    return () => {
-      listeners.delete(listener)
-    }
-  }
-
-  const subscribeSlice = <T>(
-    selector: (state: CommandState) => T,
-    listener: (slice: T) => void,
-    isEqual: (a: T, b: T) => boolean = Object.is,
+  const subscribe = (<T>(
+    selectorOrListener: CommandStoreListener | ((storeState: CommandState) => T),
+    maybeListener?: ((slice: T, prevSlice: T) => void) | undefined,
+    options?: CommandSliceSubscribeOptions<T>,
   ): (() => void) => {
-    let prev = selector(getState())
-    return subscribe(() => {
-      const next = selector(getState())
-      if (!isEqual(prev, next)) {
-        prev = next
-        listener(next)
+    if (!maybeListener) {
+      return subscribeStore(selectorOrListener as CommandStoreListener)
+    }
+
+    const selector = selectorOrListener as (storeState: CommandState) => T
+    const listener = maybeListener
+    const { equalityFn, fireImmediately } = parseSliceSubscribeOptions(options)
+    let currentSlice = selector(state)
+
+    if (fireImmediately) {
+      listener(currentSlice, currentSlice)
+    }
+
+    return subscribeStore((nextState) => {
+      const nextSlice = selector(nextState)
+      if (!equalityFn(currentSlice, nextSlice)) {
+        const prevSlice = currentSlice
+        currentSlice = nextSlice
+        listener(nextSlice, prevSlice)
       }
+    })
+  }) as CommandStore["subscribe"]
+
+  const setSearch = (next: string): void => {
+    if (next === state.search) return
+    const { nextState, nextNavigableIndex, valueChanged } = deriveNextState({
+      ...state,
+      search: next,
+    })
+    commit({
+      nextState,
+      nextNavigableIndex,
+      notifySearchChange: true,
+      notifyValueChange: valueChanged,
     })
   }
 
-  const setSearch = (next: string): void => {
-    if (next === search) return
-    search = next
-    recompute()
-    onSearchChange?.(search)
-    notify()
-  }
-
   const setValue = (next: string): void => {
-    if (next === value) return
+    if (next === state.value) return
     if (next !== "") hasBeenSelected = true
-    value = next
-    onValueChange?.(value)
-    notify()
+    commit({
+      nextState: { ...state, value: next },
+      notifyValueChange: true,
+    })
   }
 
-  const currentIndex = (): number => navigableIndex.get(value) ?? -1
+  const currentIndex = (): number => navigableIndex.get(state.value) ?? -1
 
   const selectFirst = (): void => {
-    const first = getBoundaryValue(navigableOrder, "first")
+    const first = getBoundaryValue(state.navigableOrder, "first")
     if (first === undefined) return
     setValue(first)
   }
 
   const selectLast = (): void => {
-    const last = getBoundaryValue(navigableOrder, "last")
+    const last = getBoundaryValue(state.navigableOrder, "last")
     if (last === undefined) return
     setValue(last)
   }
 
   const selectNext = (): void => {
-    const next = getAdjacentValue(navigableOrder, currentIndex(), "next", loop)
+    const next = getAdjacentValue(state.navigableOrder, currentIndex(), "next", loop)
     if (next !== undefined) setValue(next)
   }
 
   const selectPrev = (): void => {
-    const prev = getAdjacentValue(navigableOrder, currentIndex(), "prev", loop)
+    const prev = getAdjacentValue(state.navigableOrder, currentIndex(), "prev", loop)
     if (prev !== undefined) setValue(prev)
   }
 
   const setComposing = (next: boolean): void => {
-    if (next === isComposing) return
-    isComposing = next
-    notify()
+    if (next === state.isComposing) return
+    commit({ nextState: { ...state, isComposing: next } })
   }
 
   const triggerSelect = (event?: Event): void => {
-    if (value === "") return
-    const item = items.get(value)
+    if (state.value === "") return
+    const item = state.items.get(state.value)
     if (!item || item.disabled) return
-    item.onSelect?.(value, event)
+    item.onSelect?.(state.value, event)
   }
 
   const getPreparedScoreHaystack = (item: ItemData): PreparedScoreHaystack => {
@@ -466,7 +597,10 @@ export const createCommand = (options: CommandStoreOptions = {}): CommandStore =
     return prepared
   }
 
-  recompute()
+  const { nextState, nextNavigableIndex } = deriveNextState(state)
+  state = nextState
+  navigableIndex = nextNavigableIndex
+  initialState = state
   initialized = true
 
   return {
@@ -483,7 +617,7 @@ export const createCommand = (options: CommandStoreOptions = {}): CommandStore =
     selectLast,
     triggerSelect,
     getState,
+    getInitialState,
     subscribe,
-    subscribeSlice,
   }
 }

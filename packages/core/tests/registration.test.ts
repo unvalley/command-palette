@@ -5,6 +5,7 @@ describe("createCommand: registration", () => {
   it("starts with empty state", () => {
     const cmd = createCommand()
     const state = cmd.getState()
+    expect(cmd.getInitialState()).toBe(state)
     expect(state.items.size).toBe(0)
     expect(state.groups.size).toBe(0)
     expect(state.search).toBe("")
@@ -58,6 +59,18 @@ describe("createCommand: registration", () => {
     cmd.subscribe(listener)
     cmd.registerItem({ value: "a" })
     expect(listener).toHaveBeenCalled()
+  })
+
+  it("subscribe receives next and previous snapshots", () => {
+    const cmd = createCommand()
+    const listener = vi.fn()
+    cmd.subscribe(listener)
+
+    cmd.registerItem({ value: "a" })
+
+    const [nextState, prevState] = listener.mock.calls[0]
+    expect(prevState.items.has("a")).toBe(false)
+    expect(nextState.items.has("a")).toBe(true)
   })
 
   it("unsubscribe stops notifications", () => {
