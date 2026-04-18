@@ -54,6 +54,7 @@ Main methods:
 - `subscribe(listener)` or `subscribe(selector, listener, options?)`
 
 `updateOptions()` updates `filter`, `loop`, `selectOnHover`, and callbacks after creation.
+Treat the snapshots returned by `getState()` and `getInitialState()` as read-only; update the store through its methods instead of mutating returned collections.
 
 ## Filtering
 

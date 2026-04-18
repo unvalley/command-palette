@@ -58,7 +58,9 @@ export type CommandState = {
   search: string
   /** Currently highlighted item's value. '' if none. */
   value: string
+  /** Registered items. Treat as read-only and update through store methods only. */
   items: ReadonlyMap<string, ItemData>
+  /** Registered groups. Treat as read-only and update through store methods only. */
   groups: ReadonlyMap<string, GroupData>
   /** Visible items in display order. Includes disabled items (they render but are not navigable). */
   filteredOrder: readonly string[]
@@ -110,7 +112,9 @@ export type CommandStore = {
   triggerSelect: (event?: Event) => void
 
   // State access
+  /** Current store snapshot. Treat the returned state as read-only. */
   getState: () => CommandState
+  /** Initial store snapshot captured at creation time. Treat the returned state as read-only. */
   getInitialState: () => CommandState
   subscribe: {
     (listener: CommandStoreListener): () => void
