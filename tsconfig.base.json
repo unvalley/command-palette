@@ -22,7 +22,8 @@
     "ignoreDeprecations": "6.0",
     "paths": {
       "@unvalley/cmdk-core": ["packages/core/src/index.ts"],
-      "@unvalley/cmdk-react": ["packages/react/src/index.ts"]
+      "@unvalley/cmdk-react": ["packages/react/src/index.ts"],
+      "@command-palette/vue": ["packages/vue/src/index.ts"]
     }
   }
 }

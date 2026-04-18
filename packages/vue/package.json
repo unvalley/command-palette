@@ -1,0 +1,54 @@
+{
+  "name": "@command-palette/vue",
+  "version": "0.0.1",
+  "description": "Unstyled Vue command menu primitives",
+  "type": "module",
+  "sideEffects": false,
+  "keywords": [
+    "command-menu",
+    "command-palette",
+    "cmdk",
+    "vue",
+    "ui"
+  ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/unvalley/cmdk.git"
+  },
+  "homepage": "https://github.com/unvalley/cmdk/tree/main/packages/vue#readme",
+  "bugs": {
+    "url": "https://github.com/unvalley/cmdk/issues"
+  },
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "vue": "^3.4.0"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/user-event": "^14.6.1",
+    "@testing-library/vue": "^8.1.0",
+    "@unvalley/cmdk-core": "workspace:*",
+    "jsdom": "^29.0.2",
+    "tsup": "^8.5.1",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.4",
+    "vue": "^3.5.22"
+  }
+}
