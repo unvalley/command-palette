@@ -1,3 +1,5 @@
 packages:
-  - 'packages/*'
-  - 'demo/*'
+  - "packages/*"
+  - "demo/*"
+
+minimumReleaseAge: 4320
