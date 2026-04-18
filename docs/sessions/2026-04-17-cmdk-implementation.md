@@ -31,7 +31,7 @@ The "JS store as source of truth" choice solves nine long-running upstream issue
 6. **Refactor** — dropped the compound-API barrel, `interface` → `type`, `function` → arrow, `forwardRef` → ref-as-prop (React 19)
 7. **Rename** — `Input` → `CommandInput` etc. for namespace safety (shadcn/ui convention)
 8. **Dialog support** — `CommandDialog` wrapping native `<dialog>` (~0.22 KB gz)
-9. **Demo app** — Vite + React at `apps/demo`
+9. **Demo app** — Vite + React at `demo/react`
 
 ## Packages (final)
 
@@ -40,8 +40,8 @@ cmdk/
 ├── packages/
 │   ├── core/          # @unvalley/cmdk-core   (zero deps)
 │   └── react/         # @unvalley/cmdk-react  (peer: react ^19)
-└── apps/
-    └── demo/          # Vite playground, http://localhost:5173
+└── demo/
+    └── react/         # Vite playground, http://localhost:5173
 ```
 
 ### `@unvalley/cmdk-core` — framework-agnostic store
