@@ -9,11 +9,11 @@ const __dirname = path.dirname(__filename)
 const rootDir = path.resolve(__dirname, "..")
 const packagesDir = path.join(rootDir, "packages")
 
-function formatSize(bytes) {
+const formatSize = (bytes) => {
   return `${(bytes / 1024).toFixed(2)}kb`
 }
 
-async function getBundlePaths() {
+const getBundlePaths = async () => {
   const packageEntries = await readdir(packagesDir, { withFileTypes: true })
   const bundlePaths = []
 
@@ -31,7 +31,7 @@ async function getBundlePaths() {
     const distEntries = await readdir(distDir, { withFileTypes: true })
 
     for (const distEntry of distEntries) {
-      if (!distEntry.isFile() || !distEntry.name.endsWith(".js")) {
+      if (!distEntry.isFile() || !distEntry.name.endsWith(".mjs")) {
         continue
       }
 
@@ -42,7 +42,7 @@ async function getBundlePaths() {
   return bundlePaths.sort()
 }
 
-async function checkFileSize(filePath) {
+const checkFileSize = async (filePath) => {
   const file = await readFile(filePath)
   const relativePath = path.relative(rootDir, filePath)
 
@@ -51,7 +51,7 @@ async function checkFileSize(filePath) {
   )
 }
 
-async function main() {
+const main = async () => {
   const bundlePaths = await getBundlePaths()
 
   if (bundlePaths.length === 0) {
