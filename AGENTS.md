@@ -1,11 +1,16 @@
 # Principles
 
+
+## Behavior
+
+- We must refer to the latest documentation when using external libraries.
+
 ## Code
 
 We must do:
 
 - functional programming
-- TDD
+- TDD, select carefully valuable tests
 - type safe
 
 ## UI
