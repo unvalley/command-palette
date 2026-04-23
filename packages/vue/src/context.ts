@@ -6,6 +6,7 @@ export const CommandVersionKey: InjectionKey<ShallowRef<number>> = Symbol(
   "command-palette-command-version",
 )
 export const CommandA11yKey: InjectionKey<{
+  getLabel: () => string | undefined
   getItemId: (value: string) => string
   listId: string
 }> = Symbol("command-palette-command-a11y")
@@ -44,7 +45,11 @@ export const useCommandId = (prefix: string): string => {
   return allocateId(prefix)
 }
 
-export const useCommandA11y = (): { getItemId: (value: string) => string; listId: string } => {
+export const useCommandA11y = (): {
+  getLabel: () => string | undefined
+  getItemId: (value: string) => string
+  listId: string
+} => {
   const a11y = inject(CommandA11yKey, null)
   if (!a11y) {
     throw new Error("command-palette: component must be rendered inside <Command>")

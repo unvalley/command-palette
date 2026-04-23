@@ -63,6 +63,7 @@ export const Command: DefineComponent<CommandProps> = defineComponent({
     provide(CommandStoreKey, store)
     provide(CommandVersionKey, version)
     provide(CommandA11yKey, {
+      getLabel: () => props.label,
       getItemId: (value: string) => createCommandItemId(commandId, value),
       listId: createCommandListId(commandId),
     })
@@ -140,7 +141,7 @@ export const Command: DefineComponent<CommandProps> = defineComponent({
         mergeProps(
           {
             "command-palette-root": "",
-            role: "application",
+            role: "group",
             "aria-label": props.label,
             onKeydown: handleKeydown,
           },

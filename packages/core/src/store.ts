@@ -265,6 +265,12 @@ const resolveSelectedValue = ({
   return { value: nextValue, hasValue: true }
 }
 
+const getClearedSelectionState = (state: CommandState): CommandState => ({
+  ...state,
+  value: "",
+  hasValue: false,
+})
+
 export const createCommand = (options: CommandStoreOptions = {}): CommandStore => {
   let filter = options.filter ?? DEFAULT_FILTER
   let loop = options.loop ?? false
@@ -559,6 +565,14 @@ export const createCommand = (options: CommandStoreOptions = {}): CommandStore =
   const setValue = (next: string): void => {
     if (state.hasValue && next === state.value) return
     hasBeenSelected = true
+    if (!navigableIndex.has(next)) {
+      if (!state.hasValue) return
+      commit({
+        nextState: getClearedSelectionState(state),
+        notifyValueChange: true,
+      })
+      return
+    }
     commit({
       nextState: { ...state, value: next, hasValue: true },
       notifyValueChange: true,

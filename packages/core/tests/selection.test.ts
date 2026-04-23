@@ -71,6 +71,39 @@ describe("createCommand: selection", () => {
     expect(cmd.getState().value).toBe("a")
   })
 
+  it("setValue ignores values that are not navigable", () => {
+    const cmd = createCommand()
+    cmd.registerItem({ value: "a" })
+    cmd.setValue("missing")
+    expect(cmd.getState().hasValue).toBe(false)
+  })
+
+  it("setValue clears selection when moving to a disabled item", () => {
+    const calls: string[] = []
+    const cmd = createCommand({ onValueChange: (value) => calls.push(value) })
+    cmd.registerItem({ value: "a" })
+    cmd.registerItem({ value: "b", disabled: true })
+
+    cmd.setValue("a")
+    cmd.setValue("b")
+
+    expect(cmd.getState().hasValue).toBe(false)
+    expect(cmd.getState().value).toBe("")
+    expect(calls).toEqual(["a", ""])
+  })
+
+  it("setValue clears selection when moving to a filtered-out item", () => {
+    const cmd = createCommand()
+    cmd.registerItem({ value: "apple" })
+    cmd.registerItem({ value: "banana" })
+
+    cmd.setValue("banana")
+    cmd.setSearch("app")
+    cmd.setValue("banana")
+
+    expect(cmd.getState().hasValue).toBe(false)
+  })
+
   it("onValueChange is called when value changes", () => {
     const calls: string[] = []
     const cmd = createCommand({ onValueChange: (v) => calls.push(v) })

@@ -4,9 +4,11 @@ import { createContext, useCallback, useContext, useSyncExternalStore } from "re
 
 export const CommandContext: Context<CommandStore | null> = createContext<CommandStore | null>(null)
 export const CommandA11yContext: Context<{
+  getLabel: () => string | undefined
   getItemId: (value: string) => string
   listId: string
 } | null> = createContext<{
+  getLabel: () => string | undefined
   getItemId: (value: string) => string
   listId: string
 } | null>(null)
@@ -26,7 +28,11 @@ export const useCommandStore = (): CommandStore => {
   return store
 }
 
-export const useCommandA11y = (): { getItemId: (value: string) => string; listId: string } => {
+export const useCommandA11y = (): {
+  getLabel: () => string | undefined
+  getItemId: (value: string) => string
+  listId: string
+} => {
   const a11y = useContext(CommandA11yContext)
   if (!a11y) {
     throw new Error("command-palette: component must be rendered inside <Command>")

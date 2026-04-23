@@ -33,7 +33,7 @@ export const commandProps: CommandPropsOptions = {
  * Shared public props used by the root Vue command palette primitives.
  */
 export type CommandProps = {
-  /** Accessible name announced for the root `role="application"` container. */
+  /** Accessible name used by the command input when it does not provide one. */
   label?: string
   /** Controlled selected item value used with `v-model`. */
   modelValue?: string

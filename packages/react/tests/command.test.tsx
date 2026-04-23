@@ -34,6 +34,24 @@ describe("<Command>", () => {
     )
   })
 
+  it("uses label as the input accessible name by default", async () => {
+    const screen = await render(
+      <Command label="Global Command Palette">
+        <CommandInput />
+      </Command>,
+    )
+
+    await expect
+      .element(screen.getByRole("combobox"))
+      .toHaveAttribute("aria-label", "Global Command Palette")
+  })
+
+  it("groups command content without application semantics", async () => {
+    const { container } = await render(<Command label="My Menu" />)
+
+    expect(container.querySelector("[command-palette-root]")?.getAttribute("role")).toBe("group")
+  })
+
   it("updates filter after rerender", async () => {
     const screen = await render(
       <Command filter="none" search="app">
@@ -216,6 +234,24 @@ describe("<Command.Input>", () => {
     expect((input.element() as HTMLInputElement).getAttribute("aria-activedescendant")).toBe(
       activeItem.id,
     )
+  })
+
+  it("does not point aria-activedescendant at disabled options", async () => {
+    const screen = await render(
+      <Command defaultValue="apple">
+        <CommandInput placeholder="Search" />
+        <CommandList>
+          <CommandItem disabled value="apple">
+            Apple
+          </CommandItem>
+        </CommandList>
+      </Command>,
+    )
+
+    await expect
+      .element(screen.getByPlaceholder("Search"))
+      .not.toHaveAttribute("aria-activedescendant")
+    await expect.element(screen.getByText("Apple")).not.toHaveAttribute("data-selected")
   })
 
   it("uses distinct option ids for empty-string and literal 'empty' values", async () => {

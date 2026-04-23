@@ -36,14 +36,17 @@ export const CommandInput = ({
   ...rest
 }: CommandInputProps): JSX.Element => {
   const store = useCommandStore()
-  const { getItemId, listId } = useCommandA11y()
+  const { getItemId, getLabel, listId } = useCommandA11y()
   const search = useCommandSlice((s) => s.search)
   const hasVisibleItems = useCommandSlice((s) => s.filteredOrder.length > 0)
-  const selectedValue = useCommandSlice((s) => s.value)
-  const hasSelectedValue = useCommandSlice((s) => s.hasValue)
+  const activeValue = useCommandSlice((s) =>
+    s.hasValue && s.navigableOrder.includes(s.value) ? s.value : undefined,
+  )
   const pendingValueRef = useRef<string>("")
   const isControlled = value !== undefined
-  const activeDescendant = hasSelectedValue ? getItemId(selectedValue) : undefined
+  const activeDescendant = activeValue === undefined ? undefined : getItemId(activeValue)
+  const hasExplicitLabel = rest["aria-label"] !== undefined || rest["aria-labelledby"] !== undefined
+  const defaultAriaLabel = hasExplicitLabel ? undefined : getLabel()
 
   useEffect(() => {
     if (value === undefined) return
@@ -86,6 +89,7 @@ export const CommandInput = ({
       aria-autocomplete="list"
       aria-controls={listId}
       aria-expanded={hasVisibleItems}
+      aria-label={defaultAriaLabel}
       autoComplete="off"
       autoCorrect="off"
       command-palette-input=""

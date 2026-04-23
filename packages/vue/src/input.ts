@@ -27,11 +27,12 @@ export const CommandInput: DefineComponent<CommandInputProps> = defineComponent(
   },
   setup(props, { attrs, emit }): () => VNode {
     const store = useCommandStore()
-    const { getItemId, listId } = useCommandA11y()
+    const { getItemId, getLabel, listId } = useCommandA11y()
     const search = useCommandSlice((state) => state.search)
     const hasVisibleItems = useCommandSlice((state) => state.filteredOrder.length > 0)
-    const selectedValue = useCommandSlice((state) => state.value)
-    const hasSelectedValue = useCommandSlice((state) => state.hasValue)
+    const activeValue = useCommandSlice((state) =>
+      state.hasValue && state.navigableOrder.includes(state.value) ? state.value : undefined,
+    )
     const pendingValue = ref("")
 
     watch(
@@ -69,8 +70,11 @@ export const CommandInput: DefineComponent<CommandInputProps> = defineComponent(
       pendingValue.value = ""
     }
 
-    return (): VNode =>
-      h(
+    return (): VNode => {
+      const hasExplicitLabel =
+        attrs["aria-label"] !== undefined || attrs["aria-labelledby"] !== undefined
+
+      return h(
         "input",
         mergeProps(
           {
@@ -78,10 +82,10 @@ export const CommandInput: DefineComponent<CommandInputProps> = defineComponent(
             role: "combobox",
             "aria-autocomplete": "list",
             "aria-controls": listId,
-            "aria-activedescendant": hasSelectedValue.value
-              ? getItemId(selectedValue.value)
-              : undefined,
+            "aria-activedescendant":
+              activeValue.value === undefined ? undefined : getItemId(activeValue.value),
             "aria-expanded": hasVisibleItems.value ? "true" : "false",
+            "aria-label": hasExplicitLabel ? undefined : getLabel(),
             autoComplete: "off",
             autoCorrect: "off",
             spellcheck: false,
@@ -93,5 +97,6 @@ export const CommandInput: DefineComponent<CommandInputProps> = defineComponent(
           attrs,
         ),
       )
+    }
   },
 })

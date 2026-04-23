@@ -9,7 +9,7 @@ import { CommandA11yContext, CommandContext } from "./context"
  * selection/search state consumed by the rest of the primitives.
  */
 export type CommandProps = {
-  /** Accessible name announced for the root `role="application"` container. */
+  /** Accessible name used by the command input when it does not provide one. */
   label?: string
   /** Class name applied to the root element. */
   className?: string
@@ -125,6 +125,7 @@ export const Command = ({ label, className, children, ...options }: CommandProps
     <CommandContext.Provider value={store}>
       <CommandA11yContext.Provider
         value={{
+          getLabel: () => label,
           getItemId: (value) => `${baseId}-item-${encodeItemValue(value)}`,
           listId: `${baseId}-list`,
         }}
@@ -134,7 +135,7 @@ export const Command = ({ label, className, children, ...options }: CommandProps
           className={className}
           command-palette-root=""
           onKeyDown={handleKeyDown}
-          role="application"
+          role="group"
         >
           {children}
         </div>
