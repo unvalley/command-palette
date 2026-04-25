@@ -1,10 +1,12 @@
 name: Publish @command-palette/react
 
 on:
-  workflow_dispatch:
+  push:
+    tags:
+      - "react-v*"
 
 permissions:
-  contents: write
+  contents: read
   id-token: write
 
 jobs:
@@ -31,43 +33,32 @@ jobs:
       - name: Install Playwright browser
         run: pnpm --filter @command-palette/react exec playwright install --with-deps chromium
 
-      - name: Verify
-        run: pnpm check
-
-      - name: Read package version
-        id: package
+      - name: Validate release tag
+        id: release
         run: |
-          version="$(node -p "require('./packages/react/package.json').version")"
-          echo "version=${version}" >> "$GITHUB_OUTPUT"
-          echo "tag=react-v${version}" >> "$GITHUB_OUTPUT"
+          tag="${GITHUB_REF_NAME}"
+          version="${tag#react-v}"
+          package_version="$(node -p "require('./packages/react/package.json').version")"
 
-      - name: Check package version is unpublished
-        run: |
-          if npm view "@command-palette/react@${{ steps.package.outputs.version }}" version >/dev/null 2>&1; then
-            echo "@command-palette/react@${{ steps.package.outputs.version }} is already published."
+          if [ "${tag}" = "${version}" ]; then
+            echo "Tag ${tag} must start with react-v."
             exit 1
           fi
 
-      - name: Create release tag
-        run: |
-          tag="${{ steps.package.outputs.tag }}"
-          git fetch --tags --force
-
-          existing_sha="$(git rev-list -n 1 "${tag}" 2>/dev/null || true)"
-          if [ -n "${existing_sha}" ]; then
-            if [ "${existing_sha}" != "${GITHUB_SHA}" ]; then
-              echo "Tag ${tag} already exists on ${existing_sha}, not ${GITHUB_SHA}."
-              exit 1
-            fi
-
-            echo "Tag ${tag} already exists on this commit."
-            exit 0
+          if [ "${package_version}" != "${version}" ]; then
+            echo "Tag ${tag} does not match package version ${package_version}."
+            exit 1
           fi
 
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git tag -a "${tag}" -m "@command-palette/react ${{ steps.package.outputs.version }}"
-          git push origin "${tag}"
+          if npm view "@command-palette/react@${version}" version >/dev/null 2>&1; then
+            echo "@command-palette/react@${version} is already published."
+            exit 1
+          fi
+
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+
+      - name: Verify
+        run: pnpm check
 
       - name: Publish package
         run: pnpm --filter "@command-palette/react" exec npm publish --access public

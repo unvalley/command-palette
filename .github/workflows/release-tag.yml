@@ -1,0 +1,88 @@
+name: Create @command-palette/react release tag
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release, without the react-v prefix. Must match packages/react/package.json."
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browser
+        run: pnpm --filter @command-palette/react exec playwright install --with-deps chromium
+
+      - name: Validate release version
+        id: release
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: |
+          version="${RELEASE_VERSION}"
+          package_version="$(node -p "require('./packages/react/package.json').version")"
+
+          if [[ ! "${version}" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "Version ${version} is not a valid release version."
+            exit 1
+          fi
+
+          if [ "${package_version}" != "${version}" ]; then
+            echo "Input version ${version} does not match package version ${package_version}."
+            exit 1
+          fi
+
+          if npm view "@command-palette/react@${version}" version >/dev/null 2>&1; then
+            echo "@command-palette/react@${version} is already published."
+            exit 1
+          fi
+
+          tag="react-v${version}"
+          if git ls-remote --exit-code --tags origin "refs/tags/${tag}" >/dev/null 2>&1; then
+            echo "Tag ${tag} already exists."
+            exit 1
+          fi
+
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+
+      - name: Verify
+        run: pnpm check
+
+      - name: Create release tag
+        env:
+          RELEASE_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+          RELEASE_TAG: ${{ steps.release.outputs.tag }}
+          RELEASE_VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          if [ -z "${RELEASE_TOKEN}" ]; then
+            echo "Configure a RELEASE_TOKEN repository secret with contents write access."
+            exit 1
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "${RELEASE_TAG}" -m "@command-palette/react ${RELEASE_VERSION}"
+          git push "https://x-access-token:${RELEASE_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "${RELEASE_TAG}"
